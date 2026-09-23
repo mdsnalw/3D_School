@@ -1,0 +1,16 @@
+# 工作环境与本地记忆（含个人路径、代理配置等，不上传）
+.workbuddy/
+
+# 排查过程产生的临时脚本与截图
+_trash_tmp/
+_*.js
+_*.html
+_*.png
+_*.py
+
+# 系统与编辑器
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/

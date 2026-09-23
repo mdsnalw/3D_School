@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="UoDq5GxDLI43p4NzxXYT8a">
+<head data-page-node-id="8IWXSlWf5uZjnZR2HCQMIK">
+<meta charset="UTF-8" data-page-node-id="9sC5A13oDlB9ONfCnSp63o" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" data-page-node-id="zo8SFSQL8bki2qrhrTG1GY" />
+<title>数字孪生校园 · Digital Twin Campus</title>
+<!-- Cesium 主库（必须用 CDN 完整包：本地单文件缺少 Workers/Assets，实体无法渲染） -->
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.119.0/Build/Cesium/Cesium.js"></script>
+<script>
+// 备用源：jsdelivr 不可用时自动切换 unpkg
+if (typeof Cesium === 'undefined') {
+  document.write('<scr' + 'ipt src="https://unpkg.com/cesium@1.119.0/Build/Cesium/Cesium.js"><\/scr' + 'ipt>');
+}
+</script>
+<link href="https://cdn.jsdelivr.net/npm/cesium@1.119.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet" data-page-node-id="dxySLbbqR3ioDSysjY5Sgw" />
+<style>
+  :root{
+    --ink:#0d1b2a;
+    --ink-soft:#3d4f63;
+    --line:#e3e8ef;
+    --paper:#fbfcfe;
+    --accent:#1b6ff5;
+    --accent-soft:#e8f0ff;
+    --warn:#f5a524;
+    --ok:#12b76a;
+    --shadow:0 6px 24px rgba(13,27,42,.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;overflow:hidden;
+    font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+    background:#0d1b2a;color:var(--ink);-webkit-font-smoothing:antialiased;}
+  #cesiumContainer{position:absolute;inset:0;}
+
+  /* ---------- 顶部标题栏 ---------- */
+  #topbar{
+    position:absolute;top:0;left:0;right:0;height:58px;z-index:20;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 18px;
+    background:linear-gradient(180deg,rgba(251,252,254,.96) 0%,rgba(251,252,254,.86) 100%);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:11px;}
+  .logo{
+    width:32px;height:32px;border-radius:9px;flex:0 0 32px;
+    background:linear-gradient(140deg,#1b6ff5,#0ea5e9 55%,#12b76a);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:14px;letter-spacing:.5px;
+    box-shadow:0 3px 10px rgba(27,111,245,.35);
+  }
+  .brand h1{margin:0;font-size:15px;font-weight:650;letter-spacing:.2px;line-height:1.25;}
+  .brand p{margin:1px 0 0;font-size:11px;color:var(--ink-soft);letter-spacing:.35px;}
+  .topmeta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 11px;border-radius:999px;background:#fff;
+    border:1px solid var(--line);font-size:11.5px;white-space:nowrap;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);
+    box-shadow:0 0 0 3px rgba(18,183,106,.18);animation:breathe 2.4s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{opacity:1}50%{opacity:.35}}
+
+  /* ---------- 左侧控制面板 ---------- */
+  #panel{
+    position:absolute;top:74px;left:16px;z-index:20;width:236px;
+    background:rgba(251,252,254,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .pgroup{padding:13px 14px;border-bottom:1px solid var(--line);}
+  .pgroup:last-child{border-bottom:none;}
+  .ptitle{
+    font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.9px;
+    text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:6px;
+  }
+  .ptitle::before{content:"";width:3px;height:11px;border-radius:2px;background:var(--accent);}
+  .switch{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:6px 0;font-size:12.5px;cursor:pointer;user-select:none;color:var(--ink);
+  }
+  .switch:hover{color:var(--accent);}
+  .track{
+    position:relative;width:34px;height:19px;border-radius:999px;
+    background:#d6dde8;transition:background .22s ease;flex:0 0 34px;
+  }
+  .track::after{
+    content:"";position:absolute;top:2.5px;left:2.5px;width:14px;height:14px;
+    border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.22);
+    transition:transform .22s cubic-bezier(.4,1.4,.5,1);
+  }
+  .switch.on .track{background:var(--accent);}
+  .switch.on .track::after{transform:translateX(15px);}
+
+  .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .btn{
+    border:1px solid var(--line);background:#fff;border-radius:9px;
+    padding:8px 6px;font-size:12px;cursor:pointer;color:var(--ink);
+    font-family:inherit;transition:all .16s ease;text-align:center;
+    display:flex;align-items:center;justify-content:center;gap:5px;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);
+    transform:translateY(-1px);}
+  .btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.wide{grid-column:span 2;}
+  .btn svg{width:13px;height:13px;flex:0 0 13px;}
+
+  /* ---------- 右侧数据看板 ---------- */
+  #stats{
+    position:absolute;top:74px;right:16px;z-index:20;width:210px;
+    background:rgba(251,252,254,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+    padding:14px;transition:transform .3s ease,opacity .3s ease;
+  }
+  #stats.hide{transform:translateX(calc(100% + 20px));opacity:0;pointer-events:none;}
+  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
+  .stat b{display:block;font-size:19px;font-weight:700;color:var(--ink);
+    line-height:1.1;font-variant-numeric:tabular-nums;}
+  .stat b i{font-size:11px;font-style:normal;font-weight:600;color:var(--ink-soft);margin-left:2px;}
+  .stat span{display:block;font-size:10.5px;color:var(--ink-soft);margin-top:3px;letter-spacing:.2px;}
+
+  .barlist{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);}
+  .bar{margin-bottom:9px;}
+  .bar:last-child{margin-bottom:0;}
+  .bar .lb{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-soft);
+    margin-bottom:4px;}
+  .bar .lb em{font-style:normal;color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums;}
+  .bar .bg{height:5px;border-radius:3px;background:#eef2f7;overflow:hidden;}
+  .bar .fg{height:100%;border-radius:3px;width:0;transition:width .9s cubic-bezier(.3,1,.4,1);}
+
+  /* ---------- 建筑信息卡 ---------- */
+  #card{
+    position:absolute;bottom:22px;left:16px;z-index:25;width:278px;
+    background:rgba(251,252,254,.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 34px rgba(13,27,42,.16);
+    overflow:hidden;
+    transform:translateY(16px);opacity:0;pointer-events:none;
+    transition:transform .3s cubic-bezier(.2,1,.4,1),opacity .3s ease;
+  }
+  #card.show{transform:translateY(0);opacity:1;pointer-events:auto;}
+  .chead{
+    padding:12px 14px 11px;color:#fff;position:relative;
+    background:linear-gradient(120deg,#1b6ff5,#1e4fd8);
+  }
+  .chead h3{margin:0;font-size:14.5px;font-weight:650;letter-spacing:.2px;}
+  .chead p{margin:2px 0 0;font-size:11px;opacity:.82;letter-spacing:.4px;}
+  .cclose{
+    position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:6px;
+    border:none;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;
+    font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;
+    font-family:inherit;
+  }
+  .cclose:hover{background:rgba(255,255,255,.34);}
+  .cbody{padding:12px 14px 14px;}
+  .crow{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;
+    border-bottom:1px dashed #eef1f6;}
+  .crow:last-child{border-bottom:none;}
+  .crow span{color:var(--ink-soft);}
+  .crow em{font-style:normal;font-weight:600;color:var(--ink);}
+  .ctag{display:inline-block;margin-top:9px;padding:3px 9px;border-radius:6px;
+    font-size:10.5px;background:var(--accent-soft);color:var(--accent);font-weight:600;}
+
+  /* ---------- 底部提示 ---------- */
+  #hint{
+    position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:20;
+    padding:7px 16px;border-radius:999px;font-size:11.5px;color:var(--ink-soft);
+    background:rgba(251,252,254,.94);border:1px solid var(--line);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    box-shadow:var(--shadow);white-space:nowrap;
+  }
+  #hint b{color:var(--accent);font-weight:650;}
+
+  /* ---------- 加载遮罩 ---------- */
+  #loader{
+    position:absolute;inset:0;z-index:99;background:#0d1b2a;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    transition:opacity .7s ease;color:#fff;
+  }
+  #loader.out{opacity:0;pointer-events:none;}
+  .ring{
+    width:44px;height:44px;border-radius:50%;
+    border:3px solid rgba(255,255,255,.14);border-top-color:#4d9bff;
+    animation:spin .85s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loader p{margin:0;font-size:12.5px;letter-spacing:1.4px;color:rgba(255,255,255,.62);}
+  #loader .lt{font-size:17px;font-weight:600;letter-spacing:2px;color:#fff;}
+
+  .cesium-viewer-bottom{display:none!important;}
+  @media (max-width:820px){
+    #panel{width:180px;top:66px;left:10px;}
+    #stats{display:none;}
+    #card{width:calc(100% - 20px);left:10px;bottom:14px;}
+    #hint{display:none;}
+  }
+</style>
+</head>
+<body data-page-node-id="plTuwqevW6HfAei95f7auF">
+
+<div id="cesiumContainer" data-page-node-id="dGBBBiIxo0XsULor5T7DjA"></div>
+
+<div id="topbar" data-page-node-id="S4En6pVlMtuDEqRGm8sCQ1">
+  <div class="brand" data-page-node-id="jeTcoBgPuLoD8iPkU5D8UG">
+    <div class="logo" data-page-node-id="lNpCqDFc1b2LqA5mZkPmUt">DT</div>
+    <div data-page-node-id="cCgEOYfdqLQ15naztwHevU">
+      <h1 data-page-node-id="hfnyfsmiH3vBygZZcUG3F7">数字孪生校园 · 智慧运营中心</h1>
+      <p data-page-node-id="90MLOnItPkfNa6KZZ4QHOm">Digital Twin Campus &nbsp;|&nbsp; CesiumJS WebGL 三维引擎</p>
+    </div>
+  </div>
+  <div class="topmeta" data-page-node-id="WbTUZ6Umowi1kQT9218Rfr">
+    <span class="pill" data-page-node-id="5u44E9PGT2VrQJmBtaDSjL"><span class="dot" data-page-node-id="XN5XEP1HgTK6SjH7IBArBR"></span>实时在线</span>
+    <span class="pill" id="clock" data-page-node-id="z5ogvdDbGVU61fIG03D2Pr">--:--:--</span>
+  </div>
+</div>
+
+<div id="panel" data-page-node-id="5gAKrYAQd2aI9rMvbGtZBD">
+  <div class="pgroup" data-page-node-id="VpSn4yBB13ZSXcc6sCcbny">
+    <div class="ptitle" data-page-node-id="fkULzqeFwrXnccfGhKJ61J">场景图层</div>
+    <div class="switch on" data-layer="buildings" data-page-node-id="t1ILRLr1PRTRGmKh7LSP43"><span data-page-node-id="5oCKRyFf8UBVAHSOjwyasg">建筑体块</span><span class="track" data-page-node-id="1MuKNtQABpQAZH6zytAB9t"></span></div>
+    <div class="switch on" data-layer="sports" data-page-node-id="TTBw1g4OTdXltRGvPUy17c"><span data-page-node-id="Rfg4C4mYSthNBNtC3JFhgx">运动场地</span><span class="track" data-page-node-id="DpPjmf7qMpDbe3soyzhWxn"></span></div>
+    <div class="switch on" data-layer="trees" data-page-node-id="7P5eyzzGlaHyMgklG1dLwC"><span data-page-node-id="3ARHQOxpYDy4kFSt5yDoco">绿化植被</span><span class="track" data-page-node-id="QQLRJNPvIHo4CVMxtvC6nB"></span></div>
+    <div class="switch on" data-layer="labels" data-page-node-id="6D2wXgyvjsqSVrcTRNLFAA"><span data-page-node-id="HyFOWkCpXStNMSEyBvvUzk">设施标签</span><span class="track" data-page-node-id="V2cL6m6w96qWNFVPIezJmu"></span></div>
+    <div class="switch" data-layer="heat" data-page-node-id="9F7n4Fsz4FfpLZTry5xUCN"><span data-page-node-id="TechK1aAfJhTK73l1xoMxQ">人流热力</span><span class="track" data-page-node-id="fsD3hy4LxtdNAv68CFtNF3"></span></div>
+  </div>
+  <div class="pgroup" data-page-node-id="9IF8QTf5KDXuPnJVJ3d9WO">
+    <div class="ptitle" data-page-node-id="NRAq8IjOuTSzwEHFc6r6Dm">视角预设</div>
+    <div class="btnrow" data-page-node-id="Zm6LKjDijzCnj5GYjAM2zu">
+      <button class="btn active" data-view="overview" data-page-node-id="0tEqr8A5PjEFcUgaAb1vSn">全景</button>
+      <button class="btn" data-view="teaching" data-page-node-id="rBjvuXvppHlZrguNFKUuh8">教学区</button>
+      <button class="btn" data-view="playground" data-page-node-id="EZRRGdAlFQCBSsyodnqkvW">运动场</button>
+      <button class="btn" data-view="entrance" data-page-node-id="6n49exTBEDtviCXYxvZvrB">校门</button>
+      <button class="btn wide" data-view="tour" data-page-node-id="mIB9CWrwsnBurACnVKtFZk">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" data-page-node-id="gMQ0PsHEdGHn6c8yWOmnTr"><path d="M5 3l14 9-14 9V3z" data-page-node-id="0DbmvovmIkwWDBzMgcMpDI"/></svg>
+        自动巡游
+      </button>
+    </div>
+  </div>
+  <div class="pgroup" data-page-node-id="QqmopLtHkDihNyz0xowGpq">
+    <div class="ptitle" data-page-node-id="8IPSGtnEWO06M6XNC4VALc">环境模拟</div>
+    <div class="btnrow" data-page-node-id="NZcHTlW9OkCskczHRryZij">
+      <button class="btn" id="btnDay" data-page-node-id="uHydsFjaKPdAMQOSBvPQxI">白天</button>
+      <button class="btn" id="btnNight" data-page-node-id="8XUv5EkEcHYEmvMqnBcxBC">夜间</button>
+    </div>
+  </div>
+  <div class="pgroup">
+    <div class="ptitle">底图切换</div>
+    <div class="btnrow">
+      <button class="btn active" id="btnSat">卫星影像</button>
+      <button class="btn" id="btnStreet">矢量地图</button>
+    </div>
+  </div>
+</div>
+
+<div id="stats" data-page-node-id="vFty8PlhLth6azs2lFbkZq">
+  <div class="ptitle" style="font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.9px;margin-bottom:10px;display:flex;align-items:center;gap:6px;" data-page-node-id="7Nl9qqGfmiNxrHAHyXRYAO">
+    <span style="width:3px;height:11px;border-radius:2px;background:#1b6ff5;display:inline-block;" data-page-node-id="elN1Nulm3965x7CQ4SDW3h"></span>校园运行态势
+  </div>
+  <div class="statgrid" data-page-node-id="01c4eb4NDsEiVHCZAwg550">
+    <div class="stat" data-page-node-id="h0ugg3n5v6mcbhxMboYYus"><b id="sBld" data-page-node-id="qVljixLAqPiyZBMldrIAtx">0</b><span data-page-node-id="mDGJhh7XQhxGVUtbB37nar">楼栋数量</span></div>
+    <div class="stat" data-page-node-id="nqLA8OwLG0vQPJgkNjiQXf"><b id="sArea" data-page-node-id="k9vCfvPhGAGKp1KRj0zIAU">0<i data-page-node-id="6rxKEUCEVOzPBNuvhUIEve">㎡</i></b><span data-page-node-id="vhpQgXcgue8I1Wn8nDtDGZ">建筑面积</span></div>
+    <div class="stat" data-page-node-id="UitC20g6mC2ei9ykg7kaUc"><b id="sPop" data-page-node-id="RCvjfpVlXOsyDrITKK2x5a">0<i data-page-node-id="o6CmEJNjxnedBoVLG2Qq3R">人</i></b><span data-page-node-id="AHizocdSb8qXCIWz55NMER">当前在校人数</span></div>
+    <div class="stat" data-page-node-id="AjmEG4VdwdTfCX1gE6BOvM"><b id="sGreen" data-page-node-id="njIGkmLEbllqI0AG84Ugzv">0<i data-page-node-id="pO89WHdr5R3jf1nZnZn24H">%</i></b><span data-page-node-id="kEavFgi6V6xIQBSZJG8ggP">绿化覆盖率</span></div>
+  </div>
+  <div class="barlist" data-page-node-id="qUnzsG4IIXjocQ8OUdJCzM">
+    <div class="bar" data-page-node-id="bIeKqeCg90cFNr6ImGjYOT"><div class="lb" data-page-node-id="ZKm1TSXbsFKFGYacYWqdGF"><span data-page-node-id="TQQLTR4Bwnlm4WC9p9rt1B">教室使用率</span><em id="v1" data-page-node-id="kPaa4yBWgQQvTLSGAyhI7v">0%</em></div><div class="bg" data-page-node-id="nfLG3X7amdHVNldYn2dwSS"><i class="fg" id="b1" style="background:linear-gradient(90deg,#1b6ff5,#4d9bff)" data-page-node-id="JgANl1OEll4rcxrO7J1u3K"></i></div></div>
+    <div class="bar" data-page-node-id="H84OxGEesigFWanpTaBjYH"><div class="lb" data-page-node-id="XFVVSs67OACpIxOW6B8Zma"><span data-page-node-id="IVKhdvl1ifUDVlGL9EBiWF">运动场占用</span><em id="v2" data-page-node-id="bIOAlUP1RPXZUIJ2fnTw3Z">0%</em></div><div class="bg" data-page-node-id="kOJFA2Gg32QfVhuamTHEL5"><i class="fg" id="b2" style="background:linear-gradient(90deg,#12b76a,#3ddc97)" data-page-node-id="5dHmAXrihdv2FZMkFHDdyn"></i></div></div>
+    <div class="bar" data-page-node-id="W3XxAZP26ZFHSBdYyFACrG"><div class="lb" data-page-node-id="FiJDApbmgcjA0ARGTJiHrs"><span data-page-node-id="R9l9gUUiux2KdnYbw2imry">能耗负荷</span><em id="v3" data-page-node-id="rOohrqGC7CKcZuA75WkkWn">0%</em></div><div class="bg" data-page-node-id="MN8S50B5BOMvA7xZT2UUS1"><i class="fg" id="b3" style="background:linear-gradient(90deg,#f5a524,#ffc857)" data-page-node-id="Nd9The1UNz0HyaDUBjH3Sy"></i></div></div>
+  </div>
+</div>
+
+<div id="card" data-page-node-id="gg4ylgKazEAQoPIIQC2Lja">
+  <div class="chead" data-page-node-id="II0OacJ2K4M5reRGKhjftQ">
+    <button class="cclose" id="cardClose" data-page-node-id="opbnwgB32KaMVDOMDmHM85">×</button>
+    <h3 id="cName" data-page-node-id="1TDr3UHJdYZ7g7WoLrgbwq">名称</h3>
+    <p id="cEn" data-page-node-id="5lFkGabqLhb0wXrjzrtnHv">English</p>
+  </div>
+  <div class="cbody" data-page-node-id="ZhPP9YBQF8cdzHDVgVAvWY">
+    <div class="crow" data-page-node-id="hpqi1Me2mTfCejSc03HogH"><span data-page-node-id="AgDdTc60sA4BqcMBiMQ6pt">建筑类型</span><em id="cType" data-page-node-id="h9RH0YbzGxMa2DFGh1z4bz">—</em></div>
+    <div class="crow" data-page-node-id="RO39CUA5DhMpAnv5DQbNHt"><span data-page-node-id="l1b3CyFmy8414oPJz8C7wB">层数 / 高度</span><em id="cFloor" data-page-node-id="YHzBuxq2BHgrWhbFndYCU0">—</em></div>
+    <div class="crow" data-page-node-id="gKZoMTIoiYVyiwjrDetTES"><span data-page-node-id="481q9cpzteuGqxKvm73irB">建筑面积</span><em id="cArea" data-page-node-id="y0lhfhOg4N6ksgc1CPAdJs">—</em></div>
+    <div class="crow" data-page-node-id="BJFyLVmi3clDY6NCoUxLuv"><span data-page-node-id="0WxFHi3VgUq2k67hBIEN8C">当前人数</span><em id="cPop" data-page-node-id="FXWtuRFhk1BDcqlikmcPQH">—</em></div>
+    <div class="crow" data-page-node-id="Sx4Sue2ApfaBFGYWg1ALi4"><span data-page-node-id="LqJRJmcMzfHrSwITaBy88f">设备状态</span><em id="cStatus" style="color:#12b76a" data-page-node-id="MpNIGtVcD4eLgJPWok1oCp">正常运行</em></div>
+    <span class="ctag" id="cTag" data-page-node-id="gMauD3Q00dzLEhJq1Ve68P">点击查看详情</span>
+  </div>
+</div>
+
+<div id="hint" data-page-node-id="JZw4vKGWjjFUaeXn7XuOaq">左键拖动旋转 · 滚轮缩放 · 右键平移 · <b data-page-node-id="SOytLQfmwwlREdw7B9pptB">点击建筑查看详情</b></div>
+
+<div id="loader" data-page-node-id="GjYfj4OzOp6klxm1IhxAVA">
+  <div class="ring" data-page-node-id="K8FYvHgIqhDysrB85rpOz6"></div>
+  <div class="lt" data-page-node-id="M7wjPIjtiCNPyl6W1C52NA">DIGITAL TWIN CAMPUS</div>
+  <p id="loaderMsg" data-page-node-id="t1iZ4TWNxewSPX5016AVqB">正在构建三维场景…</p>
+  <p id="loaderWarn" style="display:none;max-width:440px;text-align:center;line-height:1.7;
+     color:#ffb020;font-size:12px;margin-top:6px;"></p>
+</div>
+
+<script>
+/* =========================================================
+   数字孪生校园 · CesiumJS 程序化建模
+   坐标体系：以校园中心为原点建立局部平面坐标系（单位：米），
+   X 轴向东、Y 轴向北，再统一转换为经纬度落位到地球上。
+   ========================================================= */
+
+/* ---------- 0. 运行环境自检 ----------
+   Cesium 依赖 WebGL 2 / 浮点纹理。若浏览器关闭了硬件加速，
+   或显卡驱动不被支持，会出现「界面正常但三维场景全黑」的现象。
+   这里提前检测，若命中就给用户明确提示，而不是让他对着一片黑发呆。 */
+(function preflight() {
+  try {
+    const cv = document.createElement('canvas');
+    const gl = cv.getContext('webgl2') || cv.getContext('webgl') ||
+               cv.getContext('experimental-webgl');
+    if (!gl) {
+      showEnvWarning('当前浏览器未启用 WebGL。请打开浏览器设置中「使用硬件加速模式」' +
+        '（Chrome：设置 → 系统 → 使用硬件加速模式），重启浏览器后重试。');
+      return;
+    }
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : '';
+    window.__GPU_RENDERER = renderer;
+
+    // 软件渲染器（SwiftShader / llvmpipe / Microsoft Basic Render）性能极差，
+    // Cesium 在其上通常无法正常出图。
+    const isSoftware = /swiftshader|llvmpipe|software|basic render/i.test(renderer);
+    if (isSoftware) {
+      showEnvWarning('检测到当前使用的是软件渲染（' + renderer + '）。' +
+        '请在浏览器设置中开启「使用硬件加速模式」，重启浏览器后重试。');
+    }
+    // 检查 WebGL2（Cesium 的某些特性依赖它）
+    if (!cv.getContext('webgl2')) {
+      window.__NO_WEBGL2 = true;
+    }
+  } catch (e) {
+    showEnvWarning('WebGL 初始化异常：' + e.message);
+  }
+})();
+
+function showEnvWarning(msg) {
+  window.__ENV_WARNING = msg;
+  const el = document.getElementById('loaderWarn');
+  if (el) { el.textContent = '⚠ ' + msg; el.style.display = 'block'; }
+}
+
+/* ---------- 1. 地理基准：把「米」映射到「经纬度」 ---------- */
+const ORIGIN = { lon: 118.0894, lat: 24.4798 };   // 校园中心
+const M_PER_DEG_LAT = 111320;
+const M_PER_DEG_LON = 111320 * Math.cos(ORIGIN.lat * Math.PI / 180);
+
+// 局部坐标(米) -> 经纬度高程
+function toCarto(x, y, h = 0) {
+  return Cesium.Cartesian3.fromDegrees(
+    ORIGIN.lon + x / M_PER_DEG_LON,
+    ORIGIN.lat + y / M_PER_DEG_LAT,
+    h
+  );
+}
+// 矩形（局部米）-> 多边形经纬度数组
+function rectDegrees(x0, y0, x1, y1, h = 0) {
+  return [
+    toCarto(x0, y0, h), toCarto(x1, y0, h),
+    toCarto(x1, y1, h), toCarto(x0, y1, h)
+  ];
+}
+// 任意形状（局部米数组）-> 经纬度扁平数组（Cesium 拉伸多边形需要 [lon,lat,lon,lat,...]）
+function shapeToDegreesArray(shape) {
+  const out = [];
+  shape.forEach(p => {
+    out.push(ORIGIN.lon + p[0] / M_PER_DEG_LON);
+    out.push(ORIGIN.lat + p[1] / M_PER_DEG_LAT);
+  });
+  return out;
+}
+
+/* ---------- 2. 初始化 Viewer ----------
+   关键：必须先禁用 Cesium ion 默认资源！
+   否则 Viewer 初始化时会去请求 ion 的默认底图/地形，
+   在无法访问 ion（401 / 断网 / 被墙）时会导致 dataSourceDisplay
+   初始化中断 —— 表现为「实体全部添加成功但一个都不渲染」的全黑场景。 */
+Cesium.Ion.defaultAccessToken = undefined;
+Cesium.Ion.defaultServer = undefined;
+
+/* 底图：高德影像 / 高德矢量（国内直连可用，无需 key）
+   若需换成其他源，改这里即可。 */
+function amapProvider(style) {
+  // style: 6 = 卫星影像, 8 = 矢量路网
+  return new Cesium.UrlTemplateImageryProvider({
+    url: 'https://webst0{s}.is.autonavi.com/appmaptile?style=' + style +
+         '&x={x}&y={y}&z={z}',
+    subdomains: ['1', '2', '3', '4'],
+    maximumLevel: 18,
+    credit: '高德地图'
+  });
+}
+
+/* 离线兜底底图：用 Canvas 现场画一张底纹瓦片，转成 DataURL。
+   作用：当外部瓦片服务不可用（断网 / 内网 / 被墙）时，
+   地球表面仍有内容可渲染，避免整个场景变成一片漆黑。 */
+function offlineProvider() {
+  const size = 256;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = size;
+  const g = cv.getContext('2d');
+
+  const grd = g.createLinearGradient(0, 0, size, size);
+  grd.addColorStop(0, '#e8ecef');
+  grd.addColorStop(0.5, '#dfe4e9');
+  grd.addColorStop(1, '#d5dbe1');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, size, size);
+
+  // 细网格线，让它看起来像地图底纹而不是纯色块
+  g.strokeStyle = 'rgba(160,172,184,.45)';
+  g.lineWidth = 1;
+  for (let i = 0; i <= size; i += 32) {
+    g.beginPath(); g.moveTo(i, 0); g.lineTo(i, size); g.stroke();
+    g.beginPath(); g.moveTo(0, i); g.lineTo(size, i); g.stroke();
+  }
+  // 轻微噪点，避免大屏纯色显得生硬
+  for (let i = 0; i < 500; i++) {
+    g.fillStyle = 'rgba(150,162,175,' + (Math.random() * 0.10) + ')';
+    g.fillRect(Math.random() * size, Math.random() * size, 2, 2);
+  }
+
+  return new Cesium.SingleTileImageryProvider({
+    url: cv.toDataURL('image/png'),
+    rectangle: Cesium.Rectangle.fromDegrees(-180, -90, 180, 90)
+  });
+}
+
+const providerSatellite = amapProvider(6);
+const providerStreet    = amapProvider(8);
+
+/* 注意：不要通过 Viewer 构造参数传 imageryProvider ——
+   该参数在新版 Cesium 中已废弃，会导致 dataSourceDisplay 无法就绪，
+   表现为「实体全部添加成功但一个都不渲染」（drawCommands === 0）。
+   底图统一在 Viewer 创建后用 imageryLayers.addImageryProvider 添加。 */
+const viewer = new Cesium.Viewer('cesiumContainer', {
+  baseLayerPicker: false,
+  geocoder: false,
+  homeButton: false,
+  sceneModePicker: false,
+  navigationHelpButton: false,
+  animation: false,
+  timeline: false,
+  fullscreenButton: false,
+  infoBox: false,
+  selectionIndicator: false,
+  shouldAnimate: true,
+  // 显式关掉 ion 资源，避免无法访问 ion 时初始化中断
+  baseLayer: false,
+  terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+  contextOptions: {
+    webgl: { alpha: false, antialias: true, preserveDrawingBuffer: true }
+  }
+});
+
+/* ---------- 底图：先铺离线垫底层，再叠加在线瓦片 ----------
+   在线瓦片能加载就正常显示；加载失败时下面这层会露出来，保证不黑屏。 */
+viewer.imageryLayers.addImageryProvider(offlineProvider());   // index 0：离线垫底
+viewer.imageryLayers.addImageryProvider(providerSatellite);   // index 1：在线瓦片
+
+const scene = viewer.scene;
+const camera = viewer.camera;
+// 关闭地形深度测试：无地形数据时开启会导致贴地图元被误剔除
+scene.globe.depthTestAgainstTerrain = false;
+// 关闭地球光照：由场景环境光照亮，避免太阳角度不对导致整体发黑
+scene.globe.enableLighting = false;
+scene.fog.enabled = true;
+scene.fog.density = 0.00018;
+scene.skyAtmosphere.show = true;
+// HDR 在部分显卡 / 软件渲染下会导致画面发黑，关闭更稳妥
+scene.highDynamicRange = false;
+viewer.cesiumWidget.creditContainer.style.display = 'none';
+
+// 移除默认双击追踪行为
+viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
+  Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
+);
+
+/* ---------- 3. 配色与材质工具 ---------- */
+const C = {
+  wall:      Cesium.Color.fromCssColorString('#e8e4dc'),
+  wallB:     Cesium.Color.fromCssColorString('#dcd6cb'),
+  roof:      Cesium.Color.fromCssColorString('#b8b2a6'),
+  roofRed:   Cesium.Color.fromCssColorString('#a65f4a'),
+  glass:     Cesium.Color.fromCssColorString('#7fb6d9'),
+  track:     Cesium.Color.fromCssColorString('#c4562f'),
+  field:     Cesium.Color.fromCssColorString('#4a8f5c'),
+  courtA:    Cesium.Color.fromCssColorString('#5f9e4a'),
+  courtB:    Cesium.Color.fromCssColorString('#6aa957'),
+  road:      Cesium.Color.fromCssColorString('#8f959c'),
+  walk:      Cesium.Color.fromCssColorString('#cfc9bd'),
+  plaza:     Cesium.Color.fromCssColorString('#ddd8cd'),
+  grass:     Cesium.Color.fromCssColorString('#6f9d5a'),
+  grassD:    Cesium.Color.fromCssColorString('#5d8a4b'),
+  tree:      Cesium.Color.fromCssColorString('#3f7a3a'),
+  treeD:     Cesium.Color.fromCssColorString('#2f6430'),
+  sand:      Cesium.Color.fromCssColorString('#d9c48d')
+};
+
+// 生成建筑材质（带简单竖向纹理，模拟窗格）
+function facadeMaterial(baseColor, seed) {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 256;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#' + baseColor.toCssHexString().slice(1);
+  g.fillRect(0, 0, 256, 256);
+  // 轻微水泥质感
+  for (let i = 0; i < 1400; i++) {
+    g.fillStyle = 'rgba(0,0,0,' + (Math.random() * 0.045) + ')';
+    g.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+  }
+  // 窗格
+  const cols = 8, rows = 6;
+  const pw = 256 / cols, ph = 256 / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = c * pw + pw * 0.22, y = r * ph + ph * 0.2;
+      const w = pw * 0.56, h = ph * 0.46;
+      const shade = 0.55 + Math.random() * 0.35;
+      g.fillStyle = 'rgba(96,140,172,' + shade.toFixed(2) + ')';
+      g.fillRect(x, y, w, h);
+      g.fillStyle = 'rgba(255,255,255,.28)';
+      g.fillRect(x, y, w, h * 0.28);
+    }
+  }
+  return new Cesium.ImageMaterialProperty({
+    image: cv,
+    color: Cesium.Color.WHITE,
+    repeat: new Cesium.Cartesian2(1, 1),
+    transparent: false
+  });
+}
+
+// 纯色材质
+function solid(color) {
+  return new Cesium.ColorMaterialProperty(color);
+}
+
+/* ---------- 4. 场景容器 ---------- */
+const layers = { buildings: [], sports: [], trees: [], labels: [], heat: [] };
+const pickables = [];
+const mainBuildingEnts = [];   // 建筑主体实体（用于昼夜材质切换）
+const groundPolys = [];        // 地面铺装实体（用于昼夜压暗）
+
+/* ---------- 5. 土地基底（校园铺装/草地） ---------- */
+/* 关键：不使用 classificationType（无地形时不渲染），
+   也不使用 height:0（与椭球面 z-fighting 会被剔除）。
+   统一抬高到地表之上 1 米，确保任何相机角度都能稳定显示。 */
+const GROUND_Y = 1.0;
+
+function groundPoly(coords, color, lift) {
+  const e = viewer.entities.add({
+    polygon: {
+      hierarchy: new Cesium.PolygonHierarchy(coords),
+      material: color,
+      height: GROUND_Y + (lift || 0),
+      outline: false,
+      perPositionHeight: false
+    }
+  });
+  groundPolys.push(e);
+  return e;
+}
+
+function addGround() {
+  // 城市背景层（校园外围，底图未加载时提供观感兜底）
+  groundPoly(rectDegrees(-900, -900, 900, 900, 0), Cesium.Color.fromCssColorString('#8b9a86'));
+  // 校园整体草地基底
+  groundPoly(rectDegrees(-215, -245, 215, 245, 0), Cesium.Color.fromCssColorString('#7ba45e'), 0.2);
+  // 中央轴线广场（贯穿南北的铺装带）
+  groundPoly(rectDegrees(-12, -235, 22, 235, 0), C.plaza, 0.4);
+  // 教学楼前庭铺装
+  groundPoly(rectDegrees(-110, -215, -14, -150, 0), C.plaza, 0.4);
+  // 运动区外围硬地
+  groundPoly(rectDegrees(40, -140, 210, 210, 0), Cesium.Color.fromCssColorString('#8d9b84'), 0.2);
+  // 校园环路
+  drawRoad(-205, -240, -190, 240);
+  drawRoad(188, -240, 200, 240);
+  drawRoad(-205, 228, 200, 240);
+  drawRoad(-205, -240, 200, -228);
+}
+
+function drawRoad(x0, y0, x1, y1) {
+  groundPoly(rectDegrees(x0, y0, x1, y1, 0), C.road);
+}
+
+/* ---------- 6. 建筑体：拉伸多边形 ---------- */
+const buildings = [
+  // ===== 教学综合楼 A（E 字形主楼，参考图左侧最大体量）=====
+  { id:'A', name:'教学综合楼 A 座', en:'Teaching Complex A', type:'教学楼',
+    height:16.5, floors:5, pop:640, tag:'高中部',
+    shape:[[-148,96],[-56,96],[-56,60],[-92,60],[-92,26],[-56,26],[-56,-10],[-92,-10],[-92,-44],[-56,-44],[-56,-80],[-148,-80]] },
+
+  // ===== 教学楼 B（东侧长条教学楼）=====
+  { id:'B', name:'教学楼 B 座', en:'Teaching Building B', type:'教学楼',
+    height:14, floors:4, pop:520, tag:'初中部',
+    shape:[[-36,86],[20,86],[20,-58],[-36,-58]] },
+
+  // ===== 实验楼（北侧）=====
+  { id:'C', name:'科学实验楼', en:'Science Laboratory', type:'实验楼',
+    height:12.5, floors:3, pop:180, tag:'理化生实验室',
+    shape:[[-148,150],[-96,150],[-96,110],[-148,110]] },
+
+  // ===== 图书馆 / 行政楼（西侧）=====
+  { id:'D', name:'图书行政中心', en:'Library & Administration', type:'行政楼',
+    height:15, floors:4, pop:120, tag:'图书馆 · 校务办公',
+    shape:[[-186,86],[-156,86],[-156,-30],[-186,-30]] },
+
+  // ===== 食堂（南侧）=====
+  { id:'E', name:'师生食堂', en:'Canteen', type:'生活服务',
+    height:9.5, floors:2, pop:420, tag:'可容纳 1200 人就餐',
+    shape:[[-150,-118],[-62,-118],[-62,-186],[-150,-186]] },
+
+  // ===== 体育馆（东南角）=====
+  { id:'F', name:'体育馆', en:'Gymnasium', type:'体育设施',
+    height:13, floors:2, pop:200, tag:'篮球 · 羽毛球',
+    shape:[[92,-190],[168,-190],[168,-120],[92,-120]] },
+
+  // ===== 学生宿舍（西北角）=====
+  { id:'G', name:'学生公寓', en:'Student Dormitory', type:'生活服务',
+    height:17.5, floors:6, pop:760, tag:'6 层 · 200 间',
+    shape:[[-188,215],[-96,215],[-96,166],[-188,166]] },
+
+  // ===== 校门门卫（南入口）=====
+  { id:'H', name:'南门 · 门卫室', en:'South Gate', type:'出入口',
+    height:5, floors:1, pop:12, tag:'人脸识别闸机',
+    shape:[[-14,-236],[26,-236],[26,-222],[-14,-222]] }
+];
+
+function buildBuildings() {
+  buildings.forEach(b => {
+    // 计算几何中心（用于相机聚焦）
+    const xs = b.shape.map(p => p[0]), ys = b.shape.map(p => p[1]);
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    b._center = [cx, cy];
+
+    // 底座（略大的裙边）
+    groundPoly(rectDegrees(
+      Math.min(...xs) - 1.6, Math.min(...ys) - 1.6,
+      Math.max(...xs) + 1.6, Math.max(...ys) + 1.6, 0), C.wallB, 0.6);
+
+    // 建筑主体（从地表面之上起算，避免与地球表面冲突）
+    const ent = viewer.entities.add({
+      name: b.name,
+      properties: b,
+      polygon: {
+        hierarchy: new Cesium.PolygonHierarchy(
+          Cesium.Cartesian3.fromDegreesArray(shapeToDegreesArray(b.shape))
+        ),
+        extrudedHeight: GROUND_Y + b.height,
+        height: GROUND_Y + 0.5,
+        material: facadeMaterial(C.wall, b.id.charCodeAt(0)),
+        outline: true,
+        outlineColor: Cesium.Color.fromCssColorString('#9d968a').withAlpha(0.6),
+        outlineWidth: 1
+      }
+    });
+    ent._center = [cx, cy];
+    layers.buildings.push(ent);
+    pickables.push(ent);
+    mainBuildingEnts.push(ent);
+
+    // 女儿墙 / 屋顶压顶（点击时回溯到主体）
+    const roofEnt = viewer.entities.add({
+      polygon: {
+        hierarchy: new Cesium.PolygonHierarchy(
+          Cesium.Cartesian3.fromDegreesArray(shapeToDegreesArray(b.shape))
+        ),
+        height: GROUND_Y + b.height + 0.1,
+        material: C.roof,
+        outline: true,
+        outlineColor: Cesium.Color.fromCssColorString('#8e8779'),
+        outlineWidth: 2
+      }
+    });
+    roofEnt._owner = ent;
+    roofEnt._center = [cx, cy];
+    layers.buildings.push(roofEnt);
+    pickables.push(roofEnt);
+
+    // 楼顶设备（水箱/空调机组）
+    viewer.entities.add({
+      position: toCarto(cx, cy, GROUND_Y + b.height + 2.2),
+      box: {
+        dimensions: new Cesium.Cartesian3(4, 3, 3.6),
+        material: Cesium.Color.fromCssColorString('#a8a296')
+      }
+    });
+  });
+}
+
+/* ---------- 7. 运动场地 ---------- */
+// 生成「胶囊形」田径场轮廓（体育场跑道标准形状）
+// 路径：左侧直道下端 → 左侧直道上端 → 北半圆（左→右）→ 右侧直道上端
+//       → 右侧直道下端 → 南半圆（右→左）→ 回到起点
+// cx,cy 中心；r 半径；straight 直道长度；h 高程；close 是否闭合
+function stadiumOutline(cx, cy, r, straight, h, close) {
+  const half = straight / 2;
+  const N = 28;                 // 每个半圆的分段数
+  const pts = [];
+
+  // 北半圆：从左侧 (cx-r, cy+half) 沿上半圆弧到右侧 (cx+r, cy+half)
+  // 角度从 180° 递减到 0°（数学坐标系 y 向上）
+  for (let i = 0; i <= N; i++) {
+    const a = Math.PI - Math.PI * i / N;
+    pts.push([cx + r * Math.cos(a), cy + half + r * Math.sin(a)]);
+  }
+  // 南半圆：从右侧 (cx+r, cy-half) 沿下半圆弧到左侧 (cx-r, cy-half)
+  // 角度从 0° 递减到 -180°
+  for (let i = 0; i <= N; i++) {
+    const a = -Math.PI * i / N;
+    pts.push([cx + r * Math.cos(a), cy - half + r * Math.sin(a)]);
+  }
+
+  if (close) pts.push([pts[0][0], pts[0][1]]);
+  return pts.map(p => toCarto(p[0], p[1], h));
+}
+
+function buildSports() {
+  /* ---- 400 米标准跑道（红色环形塑胶）---- */
+  const CX = 118, CY = 40;        // 跑道中心
+  const R_OUT = 60, R_IN = 40;    // 外圈 / 内圈半径
+  const STRAIGHT = 80;            // 直道长度
+
+  // 用「带孔多边形」画出跑道环：外轮廓 + 内轮廓空洞
+  const outer = stadiumOutline(CX, CY, R_OUT, STRAIGHT, 0, false);
+  const inner = stadiumOutline(CX, CY, R_IN, STRAIGHT, 0, false);
+
+  const trackEnt = viewer.entities.add({
+    name: '400 米标准跑道',
+    properties: { id:'TRACK', name:'400 米标准跑道', en:'400m Running Track',
+      type:'体育设施', height:0.5, floors:1, pop:180, tag:'8 跑道 · 塑胶面层' },
+    polygon: {
+      hierarchy: new Cesium.PolygonHierarchy(outer, [
+        new Cesium.PolygonHierarchy(inner)     // 内部挖空，露出内场草坪
+      ]),
+      material: C.track,
+      height: GROUND_Y + 0.8
+    }
+  });
+  layers.sports.push(trackEnt);
+  pickables.push(trackEnt);
+  trackEnt._center = [CX, CY];
+
+  /* ---- 内场草坪（跑道环中间）---- */
+  viewer.entities.add({
+    polygon: {
+      hierarchy: new Cesium.PolygonHierarchy(inner),
+      material: Cesium.Color.fromCssColorString('#5f9e4a'),
+      height: GROUND_Y + 0.6
+    }
+  });
+
+  /* ---- 跑道白色分道线 ---- */
+  for (let r = R_IN + 2.5; r < R_OUT - 0.5; r += 5) {
+    viewer.entities.add({
+      polyline: {
+        positions: stadiumOutline(CX, CY, r, STRAIGHT, GROUND_Y + 1.0, false),
+        width: 1.3,
+        material: Cesium.Color.WHITE.withAlpha(0.65),
+        clampToGround: false
+      }
+    });
+  }
+  // 跑道最外圈加粗白线
+  viewer.entities.add({
+    polyline: {
+      positions: stadiumOutline(CX, CY, R_OUT - 0.4, STRAIGHT, GROUND_Y + 1.05, true),
+      width: 2.2, material: Cesium.Color.WHITE.withAlpha(0.8), clampToGround: false
+    }
+  });
+
+  /* ---- 足球场（跑道内场草坪上）---- */
+  const FW = 58, FH = 88;
+  const F0X = CX - FW/2, F1X = CX + FW/2, F0Y = CY - FH/2, F1Y = CY + FH/2;
+  viewer.entities.add({
+    polygon: {
+      hierarchy: new Cesium.PolygonHierarchy(rectDegrees(F0X, F0Y, F1X, F1Y, 0)),
+      material: C.field,
+      height: GROUND_Y + 0.9
+    }
+  });
+  // 球场白线：四边 + 中线
+  const L = GROUND_Y + 1.15;
+  [
+    [F0X, F0Y, F1X, F0Y],   // 南边线
+    [F0X, F1Y, F1X, F1Y],   // 北边线
+    [F0X, F0Y, F0X, F1Y],   // 西边线
+    [F1X, F0Y, F1X, F1Y],   // 东边线
+    [F0X, CY,  F1X, CY ]    // 中线
+  ].forEach(([a, b, c, d]) => {
+    viewer.entities.add({
+      polyline: {
+        positions: [toCarto(a, b, L), toCarto(c, d, L)],
+        width: 2, material: Cesium.Color.WHITE.withAlpha(0.85), clampToGround: false
+      }
+    });
+  });
+  // 中圈
+  viewer.entities.add({
+    position: toCarto(CX, CY, 0),
+    ellipse: {
+      semiMajorAxis: 9, semiMinorAxis: 9,
+      material: Cesium.Color.TRANSPARENT,
+      outline: true, outlineColor: Cesium.Color.WHITE.withAlpha(0.85), outlineWidth: 2,
+      height: GROUND_Y + 1.1
+    }
+  });
+
+  /* ---- 网球场 / 篮球场（北侧）---- */
+  const courts = [
+    [-30, 150, 18, 184], [24, 150, 72, 184], [78, 150, 126, 184],
+    [132, 150, 180, 184], [186, 148, 214, 176]
+  ];
+  courts.forEach((c, i) => {
+    const ent = viewer.entities.add({
+      name: '室外球场 ' + (i + 1),
+      properties: { id:'CT'+i, name:'室外运动场 ' + (i+1), en:'Outdoor Court ' + (i+1),
+        type:'体育设施', height:0.4, floors:1, pop:24, tag: i < 4 ? '标准篮球场' : '网球场' },
+      polygon: {
+        hierarchy: new Cesium.PolygonHierarchy(rectDegrees(c[0], c[1], c[2], c[3], 0)),
+        material: i % 2 ? C.courtB : C.courtA,
+        height: GROUND_Y + 0.8
+      }
+    });
+    layers.sports.push(ent); pickables.push(ent);
+    ent._center = [(c[0] + c[2]) / 2, (c[1] + c[3]) / 2];
+    // 白色边线
+    const pad = 1.4;
+    viewer.entities.add({ polyline:{
+      positions: [toCarto(c[0]+pad,c[1]+pad,GROUND_Y+0.95), toCarto(c[2]-pad,c[1]+pad,GROUND_Y+0.95),
+                  toCarto(c[2]-pad,c[3]-pad,GROUND_Y+0.95), toCarto(c[0]+pad,c[3]-pad,GROUND_Y+0.95),
+
+                  toCarto(c[0]+pad,c[1]+pad,0.36)],
+      width:2, material: Cesium.Color.WHITE.withAlpha(0.8), clampToGround:false }});
+  });
+}
+
+/* ---------- 8. 绿化树木 ---------- */
+function buildTrees() {
+  const clusters = [
+    // 西侧林荫带
+    { x:-200, y:-60, w:16, h:280, n:14 },
+    // 东侧林荫带
+    { x:176, y:-60, w:22, h:290, n:14 },
+    // 北侧绿化
+    { x:-160, y:120, w:150, h:14, n:12 },
+    // 南侧绿化
+    { x:-180, y:-205, w:170, h:14, n:10 },
+    // 中线两侧行道树
+    { x:-30, y:-140, w:14, h:300, n:12 },
+    { x:36, y:-140, w:12, h:250, n:10 },
+    // 跑道东侧
+    { x:150, y:-70, w:20, h:200, n:9 },
+    // 入口庭院
+    { x:-90, y:-140, w:70, h:20, n:8 },
+    { x:-40, y:120, w:60, h:18, n:7 }
+  ];
+  clusters.forEach(cl => {
+    for (let i = 0; i < cl.n; i++) {
+      const x = cl.x + (cl.w > cl.h
+        ? (i / Math.max(cl.n - 1, 1)) * cl.w
+        : Math.random() * cl.w);
+      const y = cl.h > cl.w
+        ? (i / Math.max(cl.n - 1, 1)) * cl.h + cl.y
+        : cl.y + Math.random() * cl.h;
+      addTree(x + (Math.random() - .5) * 4, y + (Math.random() - .5) * 4);
+    }
+  });
+}
+function addTree(x, y, scale) {
+  const s = scale || (0.82 + Math.random() * 0.6);
+  const hTrunk = 2.6 * s, hCrown = 4.6 * s, rCrown = 2.7 * s;
+  const base = GROUND_Y + 0.6;   // 从地面之上起算
+  // 树干
+  const t = viewer.entities.add({
+    position: toCarto(x, y, base + hTrunk / 2),
+    cylinder: {
+      length: hTrunk, topRadius: 0.28 * s, bottomRadius: 0.42 * s,
+      material: Cesium.Color.fromCssColorString('#6b5137')
+    }
+  });
+  // 树冠（双层球体）
+  const c1 = viewer.entities.add({
+    position: toCarto(x, y, base + hTrunk + hCrown * 0.36),
+    ellipsoid: {
+      radii: new Cesium.Cartesian3(rCrown, rCrown, hCrown * 0.5),
+      material: Cesium.Color.fromCssColorString(
+        Math.random() > .5 ? '#3f7a3a' : '#4a8b41').withAlpha(0.96)
+    }
+  });
+  const c2 = viewer.entities.add({
+    position: toCarto(x + (Math.random()-.5)*1.4, y + (Math.random()-.5)*1.4,
+                      base + hTrunk + hCrown * 0.72),
+    ellipsoid: {
+      radii: new Cesium.Cartesian3(rCrown * .68, rCrown * .68, hCrown * .38),
+      material: Cesium.Color.fromCssColorString('#4f9247').withAlpha(0.94)
+    }
+  });
+  layers.trees.push(t, c1, c2);
+}
+
+/* ---------- 9. 设施标签 ---------- */
+const labelDefs = [
+  { x:-102, y:  8,  h:26, t:'教学综合楼 A 座', s:'5F · 640人' },
+  { x: -8,  y: 14,  h:23, t:'教学楼 B 座',     s:'4F · 520人' },
+  { x:-122, y:130,  h:21, t:'科学实验楼',      s:'3F · 180人' },
+  { x:-171, y: 28,  h:24, t:'图书行政中心',    s:'4F · 120人' },
+  { x:-106, y:-152, h:18, t:'师生食堂',        s:'2F · 420人' },
+  { x: 130, y:-155, h:22, t:'体育馆',          s:'2F · 200人' },
+  { x:-142, y:190,  h:26, t:'学生公寓',        s:'6F · 760人' },
+  { x: 118, y: 52,  h:3,  t:'400米标准跑道',   s:'8跑道' },
+  { x:  6,  y:-228, h:11, t:'南门 · 门卫室',   s:'人脸识别' }
+];
+function buildLabels() {
+  labelDefs.forEach(L => {
+    const e = viewer.entities.add({
+      position: toCarto(L.x, L.y, L.h),
+      label: {
+        text: L.t + '\n' + L.s,
+        font: '600 13px "PingFang SC", "Microsoft YaHei", sans-serif',
+        fillColor: Cesium.Color.WHITE,
+        outlineColor: Cesium.Color.fromCssColorString('#0d1b2a'),
+        outlineWidth: 3.5,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        showBackground: true,
+        backgroundColor: Cesium.Color.fromCssColorString('#1b6ff5').withAlpha(0.88),
+        backgroundPadding: new Cesium.Cartesian2(9, 6),
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        scaleByDistance: new Cesium.NearFarScalar(200, 1.0, 2600, 0.42),
+        pixelOffset: new Cesium.Cartesian2(0, -6)
+      }
+    });
+    layers.labels.push(e);
+  });
+}
+
+/* ---------- 10. 人流热力（可视化演示） ---------- */
+let heatEntities = [];
+function buildHeat() {
+  const hot = [
+    { x:-100, y:10,  n:240 }, { x:-8, y:14, n:210 }, { x:-106, y:-152, n:180 },
+    { x:118, y:52, n:150 },   { x:130, y:-155, n:90 }, { x:-142, y:190, n:120 },
+    { x:6, y:-228, n:60 }
+  ];
+  hot.forEach(h => {
+    const e = viewer.entities.add({
+      position: toCarto(h.x, h.y, 1.0),
+      ellipse: {
+        semiMajorAxis: 12 + h.n, semiMinorAxis: 12 + h.n,
+        material: new Cesium.ColorMaterialProperty(
+          new Cesium.CallbackProperty(() => {
+            const p = (Math.sin(Date.now() / 900 + h.n) + 1) / 2;
+            return Cesium.Color.fromCssColorString('#ff5a3c').withAlpha(0.06 + p * 0.14);
+          }, false)),
+        height: 1.0
+      }
+    });
+    heatEntities.push(e);
+    layers.heat.push(e);
+  });
+}
+
+/* ---------- 11. 构建全部内容 ---------- */
+addGround();
+buildBuildings();
+buildSports();
+buildTrees();
+buildLabels();
+buildHeat();
+setLayerVisible('heat', false);
+
+/* ---------- 12. 图层开关 ---------- */
+function setLayerVisible(key, visible) {
+  (layers[key] || []).forEach(e => { e.show = visible; });
+}
+
+document.querySelectorAll('.switch').forEach(sw => {
+  sw.addEventListener('click', () => {
+    sw.classList.toggle('on');
+    setLayerVisible(sw.dataset.layer, sw.classList.contains('on'));
+  });
+});
+
+/* ---------- 13. 相机预设视角 ---------- */
+/* 相机控制：直接算出相机在世界坐标中的位置，再用 lookAt 朝向目标。
+   这样能完全掌控相机高度，不会出现「相机跑到地表以下」的问题。
+   参数：target 局部坐标目标点；dist 相机到目标的水平距离；pitchDeg 俯角。 */
+function flyTo(x, y, h, pitchDeg, duration) {
+  // h = 相机到目标的水平距离；pitchDeg = 俯角（负数）
+  const pitch = Cesium.Math.toRadians(Math.min(-5, Math.max(-85, pitchDeg)));
+  const horiz = Math.abs(h);
+  const camHeight = horiz * Math.abs(Math.tan(pitch));   // 相机垂直高度
+
+  // 在目标点正南方向 horiz 米、高度 camHeight 米处放置相机
+  const dest = toCarto(x, y - horiz, GROUND_Y + Math.max(camHeight, 30));
+
+  camera.flyTo({
+    destination: dest,
+    orientation: { heading: 0, pitch: pitch, roll: 0 },
+    duration: duration === undefined ? 2.0 : duration,
+    easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT
+  });
+}
+
+const VIEWS = {
+  // 参数：(目标x, 目标y, 相机水平距离, 俯角, 时长)
+  overview:   () => flyTo(0, 0, 330, -38, 2.4),
+  teaching:   () => flyTo(-95, 0, 180, -30, 2.0),
+  playground: () => flyTo(118, 40, 190, -32, 2.0),
+  entrance:   () => flyTo(6, -200, 150, -14, 2.0),
+  /* 巡游路径：绕校园一圈。每个点直接给出相机经纬度位置与高度。 */
+  tour: () => {
+    let t = 0;
+    const path = [
+      { x: 20,   y: -300, h: 200 },
+      { x: -250, y: -120, h: 220 },
+      { x: -250, y: 200,  h: 230 },
+      { x: 100,  y: 280,  h: 235 },
+      { x: 290,  y: 60,   h: 220 },
+      { x: 160,  y: -260, h: 210 },
+      { x: 20,   y: -300, h: 200 }
+    ];
+    const lookAtCenter = (px, py) => {
+      // 相机朝校园中心俯视
+      const dx = 0 - px, dy = 0 - py;
+      const heading = Math.atan2(dx, dy);      // 朝向中心
+      return { heading: heading, pitch: Cesium.Math.toRadians(-30), roll: 0 };
+    };
+    const step = () => {
+      if (t >= path.length - 1) return;
+      const b = path[t + 1];
+      const o = lookAtCenter(b.x, b.y);
+      camera.flyTo({
+        destination: toCarto(b.x, b.y, b.h),
+        orientation: o,
+        duration: 5.0,
+        easingFunction: Cesium.EasingFunction.LINEAR,
+        complete: () => { t++; step(); }
+      });
+    };
+    step();
+  }
+};
+
+document.querySelectorAll('[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const v = VIEWS[btn.dataset.view];
+    if (v) v();
+  });
+});
+
+/* ---------- 14. 昼夜切换 ---------- */
+let isNight = false;
+function setNight(on) {
+  isNight = on;
+  const d = new Date();
+  const globe = viewer.scene.globe;
+
+  if (on) {
+    d.setHours(21, 30, 0);
+    // 天空与大气
+    scene.skyAtmosphere.hueShift = -0.06;
+    scene.skyAtmosphere.saturationShift = -0.35;
+    scene.skyAtmosphere.brightnessShift = -0.48;
+    scene.skyBox.show = false;
+    scene.backgroundColor = Cesium.Color.fromCssColorString('#0a1420');
+    // 地表变暗
+    globe.baseColor = Cesium.Color.fromCssColorString('#101d2b');
+    globe.enableLighting = true;
+    globe.lightingFadeOutDistance = 1e9;
+    globe.nightFadeOutDistance = 1e9;
+    // 关闭环境光
+    scene.light = new Cesium.DirectionalLight({
+      direction: scene.camera.directionWC, intensity: 0.06
+    });
+  } else {
+    d.setHours(10, 30, 0);
+    scene.skyAtmosphere.hueShift = 0;
+    scene.skyAtmosphere.saturationShift = 0;
+    scene.skyAtmosphere.brightnessShift = 0;
+    scene.skyBox.show = false;
+    scene.backgroundColor = Cesium.Color.fromCssColorString('#0d1b2a');
+    globe.baseColor = Cesium.Color.fromCssColorString('#1b2b3a');
+    globe.enableLighting = false;
+    scene.light = new Cesium.SunLight();
+  }
+  viewer.clock.currentTime = Cesium.JulianDate.fromDate(d);
+
+  // 夜间：建筑主体切换为暖黄「亮灯」材质；白天：恢复原窗格纹理
+  mainBuildingEnts.forEach(ent => {
+    if (!ent.polygon) return;
+    if (!ent._dayMat) ent._dayMat = ent.polygon.material;   // 首次记录原始材质
+    ent.polygon.material = on
+      ? new Cesium.ColorMaterialProperty(
+          Cesium.Color.fromCssColorString('#f7d98a').withAlpha(0.85))
+      : ent._dayMat;
+  });
+
+  // 夜间地面铺装压暗，突出亮灯建筑
+  groundPolys.forEach(g => {
+    if (!g._dayMat) g._dayMat = g.polygon.material;
+    g.polygon.material = on
+      ? new Cesium.ColorMaterialProperty(
+          Cesium.Color.fromCssColorString('#3a4a3e'))
+      : g._dayMat;
+  });
+
+  document.getElementById('btnDay').classList.toggle('active', !on);
+  document.getElementById('btnNight').classList.toggle('active', on);
+}
+document.getElementById('btnDay').addEventListener('click', () => setNight(false));
+document.getElementById('btnNight').addEventListener('click', () => setNight(true));
+document.getElementById('btnDay').classList.add('active');
+
+/* ---------- 14b. 底图切换 ---------- */
+function switchBasemap(which) {
+  const layers = viewer.imageryLayers;
+  // 保留最底下的离线垫底层（index 0），只替换它上面的在线瓦片
+  while (layers.length > 1) layers.remove(layers.get(1), true);
+  layers.addImageryProvider(which === 'street' ? providerStreet : providerSatellite);
+  document.getElementById('btnSat').classList.toggle('active', which !== 'street');
+  document.getElementById('btnStreet').classList.toggle('active', which === 'street');
+}
+document.getElementById('btnSat').addEventListener('click', () => switchBasemap('sat'));
+document.getElementById('btnStreet').addEventListener('click', () => switchBasemap('street'));
+
+/* ---------- 15. 点击交互：建筑高亮 + 信息卡 ---------- */
+const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+let highlighted = null;
+
+// 安全读取实体属性
+function readProps(entity) {
+  const bag = entity.properties;
+  if (!bag) return null;
+  const out = {};
+  const names = bag.propertyNames || [];
+  let ok = false;
+  names.forEach(n => {
+    let v;
+    try { v = bag[n] ? bag[n].getValue(viewer.clock.currentTime) : undefined; }
+    catch (e) { v = undefined; }
+    out[n] = v;
+    if (n === 'name' && v) ok = true;
+  });
+  return ok ? out : null;
+}
+
+handler.setInputAction((click) => {
+  const picked = scene.pick(click.position);
+  let props = null, target = null;
+
+  if (Cesium.defined(picked) && picked.id) {
+    const e = picked.id;
+    props = readProps(e);
+    target = e;
+    // 若点到的是屋顶压顶，回溯到带属性的主体
+    if (!props && e._owner) { props = readProps(e._owner); target = e._owner; }
+  }
+
+  if (props) {
+    if (highlighted) restoreStyle(highlighted);
+    highlighted = target;
+    applyHighlight(target);
+    showCard(props);
+    // 相机平滑聚焦
+    const c = target._center;
+    if (c) {
+      camera.flyTo({
+        destination: toCarto(c[0], c[1], Math.max(90, (props.height || 10) * 6)),
+        orientation: { heading: 0, pitch: Cesium.Math.toRadians(-42), roll: 0 },
+        duration: 1.5,
+        easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT
+      });
+    }
+    return;
+  }
+
+  hideCard();
+  if (highlighted) { restoreStyle(highlighted); highlighted = null; }
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+function applyHighlight(ent) {
+  const paint = (obj, key) => {
+    if (!obj || !obj[key]) return;
+    ent['_old_' + key] = obj[key];
+    obj[key] = new Cesium.ColorMaterialProperty(
+      Cesium.Color.fromCssColorString('#ffb020').withAlpha(0.95));
+    ent._hl = true;
+  };
+  paint(ent.polygon, 'material');
+  paint(ent.ellipse, 'material');
+}
+function restoreStyle(ent) {
+  if (!ent || !ent._hl) return;
+  if (ent.polygon && ent._old_material) {
+    ent.polygon.material = ent._old_material; ent._old_material = null;
+  }
+  if (ent.ellipse && ent._old_material) {
+    ent.ellipse.material = ent._old_material; ent._old_material = null;
+  }
+  ent._hl = false;
+}
+
+function showCard(p) {
+  const v = (k, d) => (p[k] === undefined || p[k] === null ? (d || '—') : p[k]);
+  document.getElementById('cName').textContent  = v('name');
+  document.getElementById('cEn').textContent    = v('en', '');
+  document.getElementById('cType').textContent  = v('type');
+  document.getElementById('cFloor').textContent = v('floors') + ' 层 / ' + v('height') + ' m';
+  document.getElementById('cArea').textContent  =
+    (Number(v('pop', 0)) * 22).toLocaleString() + ' ㎡';
+  document.getElementById('cPop').textContent   = v('pop') + ' 人';
+  document.getElementById('cTag').textContent   = v('tag', '');
+  document.getElementById('card').classList.add('show');
+}
+function hideCard(){ document.getElementById('card').classList.remove('show'); }
+document.getElementById('cardClose').addEventListener('click', () => {
+  hideCard(); if (highlighted) { restoreStyle(highlighted); highlighted = null; }
+});
+
+/* ---------- 16. 数据看板动画 ---------- */
+function animateNum(el, target, suffix, dur) {
+  const start = performance.now(), from = 0;
+  const step = (now) => {
+    const k = Math.min((now - start) / dur, 1);
+    const e = 1 - Math.pow(1 - k, 3);
+    const val = Math.round(from + (target - from) * e);
+    el.innerHTML = val.toLocaleString() + (suffix ? '<i>' + suffix + '</i>' : '');
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+const totalPop = buildings.reduce((s, b) => s + b.pop, 0);
+setTimeout(() => {
+  animateNum(document.getElementById('sBld'), buildings.length, '', 900);
+  animateNum(document.getElementById('sArea'), 42860, '㎡', 1100);
+  animateNum(document.getElementById('sPop'), totalPop, '人', 1300);
+  animateNum(document.getElementById('sGreen'), 38, '%', 900);
+  setTimeout(() => {
+    [['b1', 'v1', 72], ['b2', 'v2', 58], ['b3', 'v3', 64]].forEach(([b, v, val]) => {
+      document.getElementById(b).style.width = val + '%';
+      document.getElementById(v).textContent = val + '%';
+    });
+  }, 260);
+}, 600);
+
+// 动态刷新看板（模拟实时数据跳动）
+setInterval(() => {
+  const jitter = Math.round((Math.random() - .5) * 6);
+  const pop = totalPop + jitter;
+  document.getElementById('sPop').innerHTML = pop.toLocaleString() + '<i>人</i>';
+  const v2 = Math.max(35, Math.min(92, 58 + Math.round((Math.random()-.5)*14)));
+  document.getElementById('b2').style.width = v2 + '%';
+  document.getElementById('v2').textContent = v2 + '%';
+}, 4000);
+
+/* ---------- 17. 时钟 ---------- */
+setInterval(() => {
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    d.toLocaleTimeString('zh-CN', { hour12: false });
+}, 1000);
+
+/* ---------- 18. 初始视角 & 加载完成 ---------- */
+/* 初始视角：相机放在校园正南 320 米、海拔 340 米处，朝正北俯视 40°。
+   校园约 430×490 米，此视角下建筑轮廓清晰、跑道完整入画。
+   注意 destination 是「相机的绝对位置」（经纬度 + 海拔高度）。 */
+camera.setView({
+  destination: toCarto(0, -320, 340),
+  orientation: {
+    heading: Cesium.Math.toRadians(0),
+    pitch: Cesium.Math.toRadians(-40),
+    roll: 0
+  }
+});
+
+// 场景渲染自检：连续多帧都没有任何绘制命令才算异常。
+// 最常见原因是「双击 HTML 文件」用 file:// 协议打开 —— 浏览器会拦截
+// Cesium 依赖的 Web Worker 与贴图资源，导致三维内容完全不渲染。
+let renderChecked = false;
+let renderSamples = 0;
+let renderMaxCmds = 0;
+
+function checkRenderHealth() {
+  if (renderChecked) return;
+  try {
+    const cmds = viewer.scene.frameState
+      ? viewer.scene.frameState.commandList.length : 0;
+    if (cmds > renderMaxCmds) renderMaxCmds = cmds;
+
+    // 只要任意一帧超过 3 条绘制命令，就认为渲染正常
+    if (cmds > 3) { renderChecked = true; return; }
+
+    renderSamples++;
+    // 连续采样 20 次（约 10 秒）都没画出东西，才判定异常
+    if (renderSamples >= 20) {
+      renderChecked = true;
+      if (renderMaxCmds <= 3) {
+        const isFile = location.protocol === 'file:';
+        if (isFile) {
+          showEnvWarning('检测到你是用「双击打开」的方式访问本页（file:// 协议）。' +
+            '浏览器会拦截三维引擎需要的后台脚本，导致场景全黑。' +
+            '请改用本目录下的「启动校园.bat」打开。');
+        } else {
+          showEnvWarning('三维场景长时间未产生绘制命令。请尝试：' +
+            '① 开启浏览器硬件加速；② 更新显卡驱动；③ 换用 Chrome / Edge 最新版。');
+        }
+      }
+    } else {
+      setTimeout(checkRenderHealth, 500);
+    }
+  } catch (e) { renderChecked = true; }
+}
+
+setTimeout(() => {
+  const l = document.getElementById('loader');
+  if (l) l.classList.add('out');
+  setTimeout(() => { const el = document.getElementById('loader'); if (el) el.remove(); }, 800);
+  // 等一帧后检查渲染健康度
+  setTimeout(checkRenderHealth, 1500);
+}, 900);
+
+/* ---------- 19. 自适应窗口 ---------- */
+window.addEventListener('resize', () => viewer.resize());
+</script>
+</body>
+</html>
