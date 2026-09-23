@@ -15,20 +15,22 @@ if (typeof Cesium === 'undefined') {
 <link href="https://cdn.jsdelivr.net/npm/cesium@1.119.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet" data-page-node-id="dxySLbbqR3ioDSysjY5Sgw" />
 <style>
   :root{
-    --ink:#0d1b2a;
-    --ink-soft:#3d4f63;
-    --line:#e3e8ef;
-    --paper:#fbfcfe;
-    --accent:#1b6ff5;
-    --accent-soft:#e8f0ff;
+    /* 深色科技风：文件卡片一律深墨绿底 + 白色描边 + 高亮青绿点缀 */
+    --ink:#e8f0ed;          /* 主文字（浅色） */
+    --ink-soft:#8fa39c;     /* 次要文字 */
+    --line:rgba(255,255,255,.14);
+    --paper:rgba(14,26,24,.86);
+    --paper-solid:#0e1a18;
+    --accent:#4fd1a5;       /* 青绿高亮 */
+    --accent-soft:rgba(79,209,165,.14);
     --warn:#f5a524;
-    --ok:#12b76a;
-    --shadow:0 6px 24px rgba(13,27,42,.10);
+    --ok:#4fd1a5;
+    --shadow:0 8px 30px rgba(0,0,0,.55);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;height:100%;overflow:hidden;
     font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
-    background:#0d1b2a;color:var(--ink);-webkit-font-smoothing:antialiased;}
+    background:#0a1211;color:var(--ink);-webkit-font-smoothing:antialiased;}
   #cesiumContainer{position:absolute;inset:0;}
 
   /* ---------- 顶部标题栏 ---------- */
@@ -36,38 +38,38 @@ if (typeof Cesium === 'undefined') {
     position:absolute;top:0;left:0;right:0;height:58px;z-index:20;
     display:flex;align-items:center;justify-content:space-between;
     padding:0 18px;
-    background:linear-gradient(180deg,rgba(251,252,254,.96) 0%,rgba(251,252,254,.86) 100%);
+    background:linear-gradient(180deg,rgba(10,20,18,.92) 0%,rgba(10,20,18,.72) 100%);
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     border-bottom:1px solid var(--line);
   }
   .brand{display:flex;align-items:center;gap:11px;}
   .logo{
     width:32px;height:32px;border-radius:9px;flex:0 0 32px;
-    background:linear-gradient(140deg,#1b6ff5,#0ea5e9 55%,#12b76a);
+    background:linear-gradient(140deg,#4fd1a5,#2a9d78 60%,#1c6b56);
     display:flex;align-items:center;justify-content:center;
-    color:#fff;font-weight:700;font-size:14px;letter-spacing:.5px;
-    box-shadow:0 3px 10px rgba(27,111,245,.35);
+    color:#06120f;font-weight:800;font-size:14px;letter-spacing:.5px;
+    box-shadow:0 3px 12px rgba(79,209,165,.4);
   }
-  .brand h1{margin:0;font-size:15px;font-weight:650;letter-spacing:.2px;line-height:1.25;}
+  .brand h1{margin:0;font-size:15px;font-weight:650;letter-spacing:.2px;line-height:1.25;color:#fff;}
   .brand p{margin:1px 0 0;font-size:11px;color:var(--ink-soft);letter-spacing:.35px;}
   .topmeta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);}
   .pill{
     display:inline-flex;align-items:center;gap:6px;
-    padding:5px 11px;border-radius:999px;background:#fff;
-    border:1px solid var(--line);font-size:11.5px;white-space:nowrap;
+    padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.05);
+    border:1px solid var(--line);font-size:11.5px;white-space:nowrap;color:var(--ink);
   }
   .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);
-    box-shadow:0 0 0 3px rgba(18,183,106,.18);animation:breathe 2.4s ease-in-out infinite;}
+    box-shadow:0 0 0 3px rgba(79,209,165,.18);animation:breathe 2.4s ease-in-out infinite;}
   @keyframes breathe{0%,100%{opacity:1}50%{opacity:.35}}
 
   /* ---------- 左侧控制面板 ---------- */
   #panel{
     position:absolute;top:74px;left:16px;z-index:20;width:236px;
-    background:rgba(251,252,254,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    background:var(--paper);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
     overflow:hidden;
   }
-  .pgroup{padding:13px 14px;border-bottom:1px solid var(--line);}
+  .pgroup{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
   .pgroup:last-child{border-bottom:none;}
   .ptitle{
     font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.9px;
@@ -81,58 +83,58 @@ if (typeof Cesium === 'undefined') {
   .switch:hover{color:var(--accent);}
   .track{
     position:relative;width:34px;height:19px;border-radius:999px;
-    background:#d6dde8;transition:background .22s ease;flex:0 0 34px;
+    background:rgba(255,255,255,.16);transition:background .22s ease;flex:0 0 34px;
   }
   .track::after{
     content:"";position:absolute;top:2.5px;left:2.5px;width:14px;height:14px;
-    border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.22);
-    transition:transform .22s cubic-bezier(.4,1.4,.5,1);
+    border-radius:50%;background:#8fa39c;box-shadow:0 1px 3px rgba(0,0,0,.4);
+    transition:transform .22s cubic-bezier(.4,1.4,.5,1),background .22s ease;
   }
-  .switch.on .track{background:var(--accent);}
-  .switch.on .track::after{transform:translateX(15px);}
+  .switch.on .track{background:rgba(79,209,165,.32);}
+  .switch.on .track::after{transform:translateX(15px);background:var(--accent);}
 
   .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
   .btn{
-    border:1px solid var(--line);background:#fff;border-radius:9px;
+    border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:9px;
     padding:8px 6px;font-size:12px;cursor:pointer;color:var(--ink);
     font-family:inherit;transition:all .16s ease;text-align:center;
     display:flex;align-items:center;justify-content:center;gap:5px;
   }
   .btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);
     transform:translateY(-1px);}
-  .btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.active{background:var(--accent);border-color:var(--accent);color:#06120f;font-weight:650;}
   .btn.wide{grid-column:span 2;}
   .btn svg{width:13px;height:13px;flex:0 0 13px;}
 
   /* ---------- 右侧数据看板 ---------- */
   #stats{
     position:absolute;top:74px;right:16px;z-index:20;width:210px;
-    background:rgba(251,252,254,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    background:var(--paper);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
     border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
     padding:14px;transition:transform .3s ease,opacity .3s ease;
   }
   #stats.hide{transform:translateX(calc(100% + 20px));opacity:0;pointer-events:none;}
   .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px;}
-  .stat b{display:block;font-size:19px;font-weight:700;color:var(--ink);
+  .stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:9px 10px;}
+  .stat b{display:block;font-size:19px;font-weight:700;color:#fff;
     line-height:1.1;font-variant-numeric:tabular-nums;}
   .stat b i{font-size:11px;font-style:normal;font-weight:600;color:var(--ink-soft);margin-left:2px;}
   .stat span{display:block;font-size:10.5px;color:var(--ink-soft);margin-top:3px;letter-spacing:.2px;}
 
-  .barlist{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);}
+  .barlist{margin-top:11px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08);}
   .bar{margin-bottom:9px;}
   .bar:last-child{margin-bottom:0;}
   .bar .lb{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-soft);
     margin-bottom:4px;}
-  .bar .lb em{font-style:normal;color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums;}
-  .bar .bg{height:5px;border-radius:3px;background:#eef2f7;overflow:hidden;}
+  .bar .lb em{font-style:normal;color:#fff;font-weight:650;font-variant-numeric:tabular-nums;}
+  .bar .bg{height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;}
   .bar .fg{height:100%;border-radius:3px;width:0;transition:width .9s cubic-bezier(.3,1,.4,1);}
 
   /* ---------- 建筑信息卡 ---------- */
   #card{
     position:absolute;bottom:22px;left:16px;z-index:25;width:278px;
-    background:rgba(251,252,254,.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 34px rgba(13,27,42,.16);
+    background:rgba(12,22,20,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.6);
     overflow:hidden;
     transform:translateY(16px);opacity:0;pointer-events:none;
     transition:transform .3s cubic-bezier(.2,1,.4,1),opacity .3s ease;
@@ -140,23 +142,24 @@ if (typeof Cesium === 'undefined') {
   #card.show{transform:translateY(0);opacity:1;pointer-events:auto;}
   .chead{
     padding:12px 14px 11px;color:#fff;position:relative;
-    background:linear-gradient(120deg,#1b6ff5,#1e4fd8);
+    background:linear-gradient(120deg,rgba(79,209,165,.22),rgba(42,157,120,.10));
+    border-bottom:1px solid var(--line);
   }
-  .chead h3{margin:0;font-size:14.5px;font-weight:650;letter-spacing:.2px;}
-  .chead p{margin:2px 0 0;font-size:11px;opacity:.82;letter-spacing:.4px;}
+  .chead h3{margin:0;font-size:14.5px;font-weight:650;letter-spacing:.2px;color:#fff;}
+  .chead p{margin:2px 0 0;font-size:11px;opacity:.66;letter-spacing:.4px;color:var(--accent);}
   .cclose{
     position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:6px;
-    border:none;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;
+    border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;
     font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;
     font-family:inherit;
   }
-  .cclose:hover{background:rgba(255,255,255,.34);}
+  .cclose:hover{background:rgba(255,255,255,.26);}
   .cbody{padding:12px 14px 14px;}
   .crow{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;
-    border-bottom:1px dashed #eef1f6;}
+    border-bottom:1px dashed rgba(255,255,255,.09);}
   .crow:last-child{border-bottom:none;}
   .crow span{color:var(--ink-soft);}
-  .crow em{font-style:normal;font-weight:600;color:var(--ink);}
+  .crow em{font-style:normal;font-weight:600;color:#fff;}
   .ctag{display:inline-block;margin-top:9px;padding:3px 9px;border-radius:6px;
     font-size:10.5px;background:var(--accent-soft);color:var(--accent);font-weight:600;}
 
@@ -164,7 +167,7 @@ if (typeof Cesium === 'undefined') {
   #hint{
     position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:20;
     padding:7px 16px;border-radius:999px;font-size:11.5px;color:var(--ink-soft);
-    background:rgba(251,252,254,.94);border:1px solid var(--line);
+    background:rgba(12,22,20,.88);border:1px solid var(--line);
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     box-shadow:var(--shadow);white-space:nowrap;
   }
@@ -172,18 +175,18 @@ if (typeof Cesium === 'undefined') {
 
   /* ---------- 加载遮罩 ---------- */
   #loader{
-    position:absolute;inset:0;z-index:99;background:#0d1b2a;
+    position:absolute;inset:0;z-index:99;background:#0a1211;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
     transition:opacity .7s ease;color:#fff;
   }
   #loader.out{opacity:0;pointer-events:none;}
   .ring{
     width:44px;height:44px;border-radius:50%;
-    border:3px solid rgba(255,255,255,.14);border-top-color:#4d9bff;
+    border:3px solid rgba(255,255,255,.1);border-top-color:var(--accent);
     animation:spin .85s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg)}}
-  #loader p{margin:0;font-size:12.5px;letter-spacing:1.4px;color:rgba(255,255,255,.62);}
+  #loader p{margin:0;font-size:12.5px;letter-spacing:1.4px;color:rgba(255,255,255,.5);}
   #loader .lt{font-size:17px;font-weight:600;letter-spacing:2px;color:#fff;}
 
   .cesium-viewer-bottom{display:none!important;}
@@ -243,10 +246,10 @@ if (typeof Cesium === 'undefined') {
     </div>
   </div>
   <div class="pgroup">
-    <div class="ptitle">底图切换</div>
+    <div class="ptitle">环境配色</div>
     <div class="btnrow">
-      <button class="btn active" id="btnSat">卫星影像</button>
-      <button class="btn" id="btnStreet">矢量地图</button>
+      <button class="btn active" id="btnMoss">墨绿</button>
+      <button class="btn" id="btnDeep">深空</button>
     </div>
   </div>
 </div>
@@ -379,61 +382,14 @@ function shapeToDegreesArray(shape) {
 Cesium.Ion.defaultAccessToken = undefined;
 Cesium.Ion.defaultServer = undefined;
 
-/* 底图：高德影像 / 高德矢量（国内直连可用，无需 key）
-   若需换成其他源，改这里即可。 */
-function amapProvider(style) {
-  // style: 6 = 卫星影像, 8 = 矢量路网
-  return new Cesium.UrlTemplateImageryProvider({
-    url: 'https://webst0{s}.is.autonavi.com/appmaptile?style=' + style +
-         '&x={x}&y={y}&z={z}',
-    subdomains: ['1', '2', '3', '4'],
-    maximumLevel: 18,
-    credit: '高德地图'
-  });
-}
-
-/* 离线兜底底图：用 Canvas 现场画一张底纹瓦片，转成 DataURL。
-   作用：当外部瓦片服务不可用（断网 / 内网 / 被墙）时，
-   地球表面仍有内容可渲染，避免整个场景变成一片漆黑。 */
-function offlineProvider() {
-  const size = 256;
-  const cv = document.createElement('canvas');
-  cv.width = cv.height = size;
-  const g = cv.getContext('2d');
-
-  const grd = g.createLinearGradient(0, 0, size, size);
-  grd.addColorStop(0, '#e8ecef');
-  grd.addColorStop(0.5, '#dfe4e9');
-  grd.addColorStop(1, '#d5dbe1');
-  g.fillStyle = grd;
-  g.fillRect(0, 0, size, size);
-
-  // 细网格线，让它看起来像地图底纹而不是纯色块
-  g.strokeStyle = 'rgba(160,172,184,.45)';
-  g.lineWidth = 1;
-  for (let i = 0; i <= size; i += 32) {
-    g.beginPath(); g.moveTo(i, 0); g.lineTo(i, size); g.stroke();
-    g.beginPath(); g.moveTo(0, i); g.lineTo(size, i); g.stroke();
-  }
-  // 轻微噪点，避免大屏纯色显得生硬
-  for (let i = 0; i < 500; i++) {
-    g.fillStyle = 'rgba(150,162,175,' + (Math.random() * 0.10) + ')';
-    g.fillRect(Math.random() * size, Math.random() * size, 2, 2);
-  }
-
-  return new Cesium.SingleTileImageryProvider({
-    url: cv.toDataURL('image/png'),
-    rectangle: Cesium.Rectangle.fromDegrees(-180, -90, 180, 90)
-  });
-}
-
-const providerSatellite = amapProvider(6);
-const providerStreet    = amapProvider(8);
+/* ---------- 完全矢量背景 ----------
+   不加载任何卫星影像 / 路网瓦片（用户要求「尽量避免使用实景地图素材」）。
+   外围的城市肌理全部由程序化矢量体块 + 网格 + 道路组成，
+   底图颜色由 scene.globe.baseColor 与 THEMES 主题统一控制。 */
 
 /* 注意：不要通过 Viewer 构造参数传 imageryProvider ——
    该参数在新版 Cesium 中已废弃，会导致 dataSourceDisplay 无法就绪，
-   表现为「实体全部添加成功但一个都不渲染」（drawCommands === 0）。
-   底图统一在 Viewer 创建后用 imageryLayers.addImageryProvider 添加。 */
+   表现为「实体全部添加成功但一个都不渲染」（drawCommands === 0）。 */
 const viewer = new Cesium.Viewer('cesiumContainer', {
   baseLayerPicker: false,
   geocoder: false,
@@ -454,13 +410,19 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   }
 });
 
-/* ---------- 底图：先铺离线垫底层，再叠加在线瓦片 ----------
-   在线瓦片能加载就正常显示；加载失败时下面这层会露出来，保证不黑屏。 */
-viewer.imageryLayers.addImageryProvider(offlineProvider());   // index 0：离线垫底
-viewer.imageryLayers.addImageryProvider(providerSatellite);   // index 1：在线瓦片
+/* 不添加任何 imageryLayer —— 地球表面颜色完全由 globe.baseColor 决定，
+   上面再铺我们自己的矢量地面多边形 / 城市体块。 */
+viewer.imageryLayers.removeAll();
 
 const scene = viewer.scene;
 const camera = viewer.camera;
+
+/* 诊断出口：把关键对象挂到 window，方便在浏览器控制台或自动化脚本里检查
+   渲染状态（viewer.scene.frameState.commandList.length 是判断「是否黑屏」
+   最直接的指标，正常应有几十条绘制命令）。 */
+window.viewer = viewer;
+window.Cesium = Cesium;
+
 // 关闭地形深度测试：无地形数据时开启会导致贴地图元被误剔除
 scene.globe.depthTestAgainstTerrain = false;
 // 关闭地球光照：由场景环境光照亮，避免太阳角度不对导致整体发黑
@@ -478,59 +440,46 @@ viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
 );
 
 /* ---------- 3. 配色与材质工具 ---------- */
+/* 深色科技风配色：校园实体用浅灰白，周边城市用暗色低伏体块，
+   背景为深墨绿，整体形成「暗底亮物」的对比层次。 */
 const C = {
-  wall:      Cesium.Color.fromCssColorString('#e8e4dc'),
-  wallB:     Cesium.Color.fromCssColorString('#dcd6cb'),
-  roof:      Cesium.Color.fromCssColorString('#b8b2a6'),
-  roofRed:   Cesium.Color.fromCssColorString('#a65f4a'),
-  glass:     Cesium.Color.fromCssColorString('#7fb6d9'),
-  track:     Cesium.Color.fromCssColorString('#c4562f'),
-  field:     Cesium.Color.fromCssColorString('#4a8f5c'),
-  courtA:    Cesium.Color.fromCssColorString('#5f9e4a'),
-  courtB:    Cesium.Color.fromCssColorString('#6aa957'),
-  road:      Cesium.Color.fromCssColorString('#8f959c'),
-  walk:      Cesium.Color.fromCssColorString('#cfc9bd'),
-  plaza:     Cesium.Color.fromCssColorString('#ddd8cd'),
-  grass:     Cesium.Color.fromCssColorString('#6f9d5a'),
-  grassD:    Cesium.Color.fromCssColorString('#5d8a4b'),
-  tree:      Cesium.Color.fromCssColorString('#3f7a3a'),
-  treeD:     Cesium.Color.fromCssColorString('#2f6430'),
-  sand:      Cesium.Color.fromCssColorString('#d9c48d')
+  // 建筑
+  wall:      Cesium.Color.fromCssColorString('#dfe3e6'),
+  wallB:     Cesium.Color.fromCssColorString('#cdd3d8'),
+  roof:      Cesium.Color.fromCssColorString('#eef1f3'),
+  roofEdge:  Cesium.Color.fromCssColorString('#ffffff'),
+  glass:     Cesium.Color.fromCssColorString('#8fb4cc'),
+  // 立面横向窗带（深蓝灰，实景参考图里最显眼的特征）
+  facadeBand: Cesium.Color.fromCssColorString('#3d5a70'),
+  // 运动场地
+  track:     Cesium.Color.fromCssColorString('#c05a42'),
+  field:     Cesium.Color.fromCssColorString('#57a06a'),
+  courtA:    Cesium.Color.fromCssColorString('#3f7fc4'),
+  courtB:    Cesium.Color.fromCssColorString('#4a8fd4'),
+  // 地面
+  ground:    Cesium.Color.fromCssColorString('#2d3a35'),
+  groundLt:  Cesium.Color.fromCssColorString('#35443e'),
+  campus:    Cesium.Color.fromCssColorString('#3c4a43'),
+  plaza:     Cesium.Color.fromCssColorString('#d8dcdf'),
+  walk:      Cesium.Color.fromCssColorString('#c3c9cd'),
+  road:      Cesium.Color.fromCssColorString('#4a5450'),
+  // 市政道路（校园外）
+  cityRoad:  Cesium.Color.fromCssColorString('#3f4a45'),
+  // 绿化
+  grass:     Cesium.Color.fromCssColorString('#5c8a63'),
+  grassD:    Cesium.Color.fromCssColorString('#4b7654'),
+  tree:      Cesium.Color.fromCssColorString('#5f9d6a'),
+  treeD:     Cesium.Color.fromCssColorString('#478057'),
+  // 周边城市体块
+  cityA:     Cesium.Color.fromCssColorString('#26302c'),
+  cityB:     Cesium.Color.fromCssColorString('#2b3732'),
+  cityRoof:  Cesium.Color.fromCssColorString('#323e39'),
+  grid:      Cesium.Color.fromCssColorString('#4a5c55').withAlpha(0.75)
 };
 
-// 生成建筑材质（带简单竖向纹理，模拟窗格）
-function facadeMaterial(baseColor, seed) {
-  const cv = document.createElement('canvas');
-  cv.width = 256; cv.height = 256;
-  const g = cv.getContext('2d');
-  g.fillStyle = '#' + baseColor.toCssHexString().slice(1);
-  g.fillRect(0, 0, 256, 256);
-  // 轻微水泥质感
-  for (let i = 0; i < 1400; i++) {
-    g.fillStyle = 'rgba(0,0,0,' + (Math.random() * 0.045) + ')';
-    g.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
-  }
-  // 窗格
-  const cols = 8, rows = 6;
-  const pw = 256 / cols, ph = 256 / rows;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const x = c * pw + pw * 0.22, y = r * ph + ph * 0.2;
-      const w = pw * 0.56, h = ph * 0.46;
-      const shade = 0.55 + Math.random() * 0.35;
-      g.fillStyle = 'rgba(96,140,172,' + shade.toFixed(2) + ')';
-      g.fillRect(x, y, w, h);
-      g.fillStyle = 'rgba(255,255,255,.28)';
-      g.fillRect(x, y, w, h * 0.28);
-    }
-  }
-  return new Cesium.ImageMaterialProperty({
-    image: cv,
-    color: Cesium.Color.WHITE,
-    repeat: new Cesium.Cartesian2(1, 1),
-    transparent: false
-  });
-}
+// 描边统一色（白色系，营造矢量线框质感）
+const EDGE = Cesium.Color.fromCssColorString('#ffffff').withAlpha(0.55);
+const EDGE_SOFT = Cesium.Color.fromCssColorString('#ffffff').withAlpha(0.28);
 
 // 纯色材质
 function solid(color) {
@@ -541,15 +490,16 @@ function solid(color) {
 const layers = { buildings: [], sports: [], trees: [], labels: [], heat: [] };
 const pickables = [];
 const mainBuildingEnts = [];   // 建筑主体实体（用于昼夜材质切换）
+const facadeBandEnts = [];     // 立面窗带实体（夜间点亮为暖黄）
 const groundPolys = [];        // 地面铺装实体（用于昼夜压暗）
 
-/* ---------- 5. 土地基底（校园铺装/草地） ---------- */
+/* ---------- 5. 土地基底（校园 + 周边城市矢量肌理） ---------- */
 /* 关键：不使用 classificationType（无地形时不渲染），
    也不使用 height:0（与椭球面 z-fighting 会被剔除）。
-   统一抬高到地表之上 1 米，确保任何相机角度都能稳定显示。 */
+   统一抬高到地表之上，确保任何相机角度都能稳定显示。 */
 const GROUND_Y = 1.0;
 
-function groundPoly(coords, color, lift) {
+function groundPoly(coords, color, lift, themeRole) {
   const e = viewer.entities.add({
     polygon: {
       hierarchy: new Cesium.PolygonHierarchy(coords),
@@ -559,21 +509,141 @@ function groundPoly(coords, color, lift) {
       perPositionHeight: false
     }
   });
+  if (themeRole) e._themeRole = themeRole;   // 供主题切换重新着色
   groundPolys.push(e);
   return e;
 }
 
+/* 带描边的地面块（用于校园建筑底座、广场等需要矢量线框感的位置） */
+function outlinedGround(coords, color, lift, edgeColor, edgeWidth) {
+  const e = viewer.entities.add({
+    polygon: {
+      hierarchy: new Cesium.PolygonHierarchy(coords),
+      material: color,
+      height: GROUND_Y + (lift || 0),
+      outline: true,
+      outlineColor: edgeColor || EDGE_SOFT,
+      outlineWidth: edgeWidth || 1
+    }
+  });
+  groundPolys.push(e);
+  return e;
+}
+
+/* ---------- 周边城市肌理（纯矢量，不使用实景地图） ---------- */
+/* 用「街区网格 + 低伏体块」模拟城市肌理，参照深色科技风参考图。 */
+const cityBlocks = [];      // 周边建筑体块
+
+function addCityGrid() {
+  const S = 1400;   // 城市范围半径（米）
+
+  // 1) 城市底色
+  groundPoly(rectDegrees(-S, -S, S, S, 0), C.ground, 0, 'ground');
+
+  // 2) 网格线（街区划分，营造规整城市肌理）
+  const step = 90;
+  for (let x = -S; x <= S; x += step) {
+    if (Math.abs(x) < 235) continue;            // 校园范围内不画
+    groundPoly(rectDegrees(x - 0.9, -S, x + 0.9, S, 0), C.grid, 0.05, 'grid');
+  }
+  for (let y = -S; y <= S; y += step) {
+    if (Math.abs(y) < 265) continue;
+    groundPoly(rectDegrees(-S, y - 0.9, S, y + 0.9, 0), C.grid, 0.05, 'grid');
+  }
+
+  // 3) 市政主干道（校园四周，宽 26 米）
+  const RW = 13;
+  const cityRoad = (x0, y0, x1, y1) =>
+    groundPoly(rectDegrees(x0, y0, x1, y1, 0), C.cityRoad, 0.15, 'cityRoad');
+
+  cityRoad(-S, 258, S, 258 + RW * 2);      // 北侧主干道
+  cityRoad(-S, -258 - RW * 2, S, -258);    // 南侧主干道
+  cityRoad(-258 - RW * 2, -S, -258, S);    // 西侧主干道
+  cityRoad(258, -S, 258 + RW * 2, S);      // 东侧主干道
+
+  // 道路中心虚线
+  for (let x = -S; x < S; x += 26) {
+    groundPoly(rectDegrees(x, 262, x + 14, 264, 0),
+      Cesium.Color.fromCssColorString('#c8ccc6').withAlpha(0.35), 0.2);
+    groundPoly(rectDegrees(x, -264, x + 14, -262, 0),
+      Cesium.Color.fromCssColorString('#c8ccc6').withAlpha(0.35), 0.2);
+  }
+  for (let y = -S; y < S; y += 26) {
+    groundPoly(rectDegrees(-264, y, -262, y + 14, 0),
+      Cesium.Color.fromCssColorString('#c8ccc6').withAlpha(0.35), 0.2);
+    groundPoly(rectDegrees(262, y, 264, y + 14, 0),
+      Cesium.Color.fromCssColorString('#c8ccc6').withAlpha(0.35), 0.2);
+  }
+}
+
+/* 低伏的城市建筑体块：网格状分布，高度随机，深浅交错。
+   校园四周留出缓冲带，越靠近校园越矮，形成视觉聚焦。 */
+function addCityBlocks() {
+  const S = 1200;
+  const gap = 22;                     // 地块间隔
+  const bw = 54, bd = 46;             // 典型地块建筑尺寸
+  const coreClear = 285;              // 校园及邻近区域留空半径（贴近校园但不压进去）
+
+  for (let gx = -S; gx < S; gx += bw + gap) {
+    for (let gy = -S; gy < S; gy += bd + gap) {
+      const cx = gx + bw / 2, cy = gy + bd / 2;
+
+      // 跳过校园及其缓冲带（按矩形判定，跟校园实际范围对齐）
+      if (Math.abs(cx) < coreClear && Math.abs(cy) < coreClear) continue;
+      // 跳过市政道路带（紧贴校园外圈 26 米）
+      if (Math.abs(cx) < 272 || Math.abs(cy) < 272) continue;
+
+      // 随机留白，避免过满
+      if (Math.random() < 0.18) continue;
+
+      // 距校园越近越矮，远处逐步长高，形成「低伏环绕 + 远处天际线」
+      const d = Math.min(Math.abs(cx), Math.abs(cy));
+      const falloff = Math.min(1, (d - coreClear) / 450);
+      const h = 14 + Math.random() * 30 * (0.35 + falloff);
+
+      const jw = bw * (0.72 + Math.random() * 0.5);
+      const jd = bd * (0.72 + Math.random() * 0.5);
+      const x0 = cx - jw / 2, y0 = cy - jd / 2;
+
+      const isDark = Math.random() < 0.55;
+      const ent = viewer.entities.add({
+        polygon: {
+          hierarchy: new Cesium.PolygonHierarchy(
+            rectDegrees(x0, y0, x0 + jw, y0 + jd, 0)),
+          height: GROUND_Y + 0.2,
+          extrudedHeight: GROUND_Y + h,
+          material: isDark ? C.cityA : C.cityB,
+          outline: true,
+          outlineColor: Cesium.Color.fromCssColorString('#5a6b63').withAlpha(0.6),
+          outlineWidth: 1
+        }
+      });
+      ent._themeRole = isDark ? 'cityA' : 'cityB';
+      cityBlocks.push(ent);
+    }
+  }
+}
+
 function addGround() {
-  // 城市背景层（校园外围，底图未加载时提供观感兜底）
-  groundPoly(rectDegrees(-900, -900, 900, 900, 0), Cesium.Color.fromCssColorString('#8b9a86'));
-  // 校园整体草地基底
-  groundPoly(rectDegrees(-215, -245, 215, 245, 0), Cesium.Color.fromCssColorString('#7ba45e'), 0.2);
+  // 周边城市矢量肌理
+  addCityGrid();
+  addCityBlocks();
+
+  // 校园外围场地（深色，与城市区分开）
+  groundPoly(rectDegrees(-252, -282, 252, 282, 0), C.groundLt, 0.3, 'groundLt');
+
+  // 校园整体基底
+  groundPoly(rectDegrees(-215, -245, 215, 245, 0), C.campus, 0.4, 'campus');
+
   // 中央轴线广场（贯穿南北的铺装带）
-  groundPoly(rectDegrees(-12, -235, 22, 235, 0), C.plaza, 0.4);
+  outlinedGround(rectDegrees(-12, -235, 22, 235, 0), C.plaza, 0.6);
+
   // 教学楼前庭铺装
-  groundPoly(rectDegrees(-110, -215, -14, -150, 0), C.plaza, 0.4);
+  outlinedGround(rectDegrees(-110, -215, -14, -150, 0), C.plaza, 0.6);
+
   // 运动区外围硬地
-  groundPoly(rectDegrees(40, -140, 210, 210, 0), Cesium.Color.fromCssColorString('#8d9b84'), 0.2);
+  groundPoly(rectDegrees(40, -140, 210, 210, 0), C.groundLt, 0.4, 'groundLt');
+
   // 校园环路
   drawRoad(-205, -240, -190, 240);
   drawRoad(188, -240, 200, 240);
@@ -582,51 +652,142 @@ function addGround() {
 }
 
 function drawRoad(x0, y0, x1, y1) {
-  groundPoly(rectDegrees(x0, y0, x1, y1, 0), C.road);
+  groundPoly(rectDegrees(x0, y0, x1, y1, 0), C.road, 0.5, 'road');
 }
 
 /* ---------- 6. 建筑体：拉伸多边形 ---------- */
+/* 按实景立面参考（图二）重建：主体教学组团由「中央主体 + 左右前伸两翼」
+   围合成 U 形院落，后方另有一道南北向连廊轴贯穿，形成多个内庭院。
+   布局对齐俯视参考（图三）：教学组团在西侧，田径场在东侧。 */
+
 const buildings = [
-  // ===== 教学综合楼 A（E 字形主楼，参考图左侧最大体量）=====
-  { id:'A', name:'教学综合楼 A 座', en:'Teaching Complex A', type:'教学楼',
-    height:16.5, floors:5, pop:640, tag:'高中部',
-    shape:[[-148,96],[-56,96],[-56,60],[-92,60],[-92,26],[-56,26],[-56,-10],[-92,-10],[-92,-44],[-56,-44],[-56,-80],[-148,-80]] },
+  // ===== 中央主体（教学主楼，含中部门厅）=====
+  { id:'A', name:'求知楼', en:'Main Teaching Building', type:'教学楼',
+    height:17.5, floors:5, pop:2160, tag:'沿北侧入口展开的教学组团，与中心庭院相连。',
+    shape:[[-160,60],[-30,60],[-30,-60],[-160,-60]] },
 
-  // ===== 教学楼 B（东侧长条教学楼）=====
-  { id:'B', name:'教学楼 B 座', en:'Teaching Building B', type:'教学楼',
-    height:14, floors:4, pop:520, tag:'初中部',
-    shape:[[-36,86],[20,86],[20,-58],[-36,-58]] },
+  // ===== 西翼（向前伸出，围合西侧庭院）=====
+  { id:'B', name:'明德楼', en:'West Wing', type:'教学楼',
+    height:15, floors:4, pop:520, tag:'西侧教学翼楼，与主体以连廊相接。',
+    shape:[[-196,60],[-166,60],[-166,-130],[-196,-130]] },
 
-  // ===== 实验楼（北侧）=====
-  { id:'C', name:'科学实验楼', en:'Science Laboratory', type:'实验楼',
-    height:12.5, floors:3, pop:180, tag:'理化生实验室',
-    shape:[[-148,150],[-96,150],[-96,110],[-148,110]] },
+  // ===== 东翼（向前伸出，围合东侧庭院）=====
+  { id:'C', name:'启智楼', en:'East Wing', type:'教学楼',
+    height:15, floors:4, pop:480, tag:'东侧教学翼楼，面向田径场。',
+    shape:[[-28,60],[4,60],[4,-130],[-28,-130]] },
 
-  // ===== 图书馆 / 行政楼（西侧）=====
-  { id:'D', name:'图书行政中心', en:'Library & Administration', type:'行政楼',
-    height:15, floors:4, pop:120, tag:'图书馆 · 校务办公',
-    shape:[[-186,86],[-156,86],[-156,-30],[-186,-30]] },
+  // ===== 后方连廊轴（贯穿南北，串联各庭院）=====
+  { id:'D', name:'综合楼', en:'Comprehensive Building', type:'综合楼',
+    height:14, floors:4, pop:360, tag:'南北向连廊轴，串联各教学庭院。',
+    shape:[[-118,120],[-70,120],[-70,-40],[-118,-40]] },
 
-  // ===== 食堂（南侧）=====
-  { id:'E', name:'师生食堂', en:'Canteen', type:'生活服务',
-    height:9.5, floors:2, pop:420, tag:'可容纳 1200 人就餐',
-    shape:[[-150,-118],[-62,-118],[-62,-186],[-150,-186]] },
+  // ===== 风雨操场（南侧，大跨屋面）=====
+  { id:'E', name:'风雨操场', en:'Indoor Sports Hall', type:'体育设施',
+    height:12, floors:2, pop:300, tag:'大跨屋面风雨操场，南侧独立体量。',
+    shape:[[-186,-152],[-84,-152],[-84,-214],[-186,-214]] },
 
-  // ===== 体育馆（东南角）=====
-  { id:'F', name:'体育馆', en:'Gymnasium', type:'体育设施',
-    height:13, floors:2, pop:200, tag:'篮球 · 羽毛球',
-    shape:[[92,-190],[168,-190],[168,-120],[92,-120]] },
-
-  // ===== 学生宿舍（西北角）=====
-  { id:'G', name:'学生公寓', en:'Student Dormitory', type:'生活服务',
-    height:17.5, floors:6, pop:760, tag:'6 层 · 200 间',
-    shape:[[-188,215],[-96,215],[-96,166],[-188,166]] },
-
-  // ===== 校门门卫（南入口）=====
-  { id:'H', name:'南门 · 门卫室', en:'South Gate', type:'出入口',
-    height:5, floors:1, pop:12, tag:'人脸识别闸机',
-    shape:[[-14,-236],[26,-236],[26,-222],[-14,-222]] }
+  // ===== 门厅 / 南入口（带长挑檐的独立门房）=====
+  { id:'F', name:'南门 · 门厅', en:'South Gate', type:'出入口',
+    height:6.5, floors:1, pop:12, tag:'独立门厅，人脸识别闸机。',
+    shape:[[-16,-238],[30,-238],[30,-220],[-16,-220]] }
 ];
+
+/* 屋顶设备间：实景参考图中屋面上凸起的浅色小方块（楼梯间/设备房）。
+   按建筑体量自动铺排，是这套立面最显眼的识别特征。 */
+function addRoofPods(ent, b) {
+  const xs = b.shape.map(p => p[0]);
+  const ys = b.shape.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const w = x1 - x0, d = y1 - y0;
+
+  // 沿长边等距布置设备间
+  const alongY = d >= w;
+  const span = alongY ? d : w;
+  const count = Math.max(2, Math.round(span / 46));
+  const podH = 2.8;
+
+  for (let i = 0; i < count; i++) {
+    const t = (i + 0.5) / count;
+    const pw = alongY ? w * 0.46 : 13;
+    const pd = alongY ? 13 : d * 0.46;
+    const px = alongY ? x0 + w * 0.27 : x0 + t * w - pw / 2;
+    const py = alongY ? y0 + t * d - pd / 2 : y0 + d * 0.27;
+
+    const pod = viewer.entities.add({
+      polygon: {
+        hierarchy: new Cesium.PolygonHierarchy(
+          rectDegrees(px, py, px + pw, py + pd, 0)),
+        height: GROUND_Y + b.height,
+        extrudedHeight: GROUND_Y + b.height + podH,
+        material: C.roof,
+        outline: true,
+        outlineColor: EDGE,
+        outlineWidth: 1.5
+      }
+    });
+    pod._owner = ent;
+    layers.buildings.push(pod);
+    pickables.push(pod);
+  }
+}
+
+/* 立面窗带：沿建筑四边外侧贴一圈「横向条窗」薄片。
+   为什么不直接用 ImageMaterialProperty 贴图？
+   Cesium 对拉伸多边形（extrudedHeight）的墙面 UV 是按整个周长归一化的，
+   楼一长纹理就被拉伸糊成一片纯色（实测只在墙体底部露出一点图案）。
+   改成显式几何后，每条窗带的位置、高度都精确可控，远看也清晰。 */
+function addFacadeBands(ent, b) {
+  const floors = Math.max(2, b.floors - 1);   // 顶层留作女儿墙
+  const h = b.height;
+  const bandH = Math.min(1.9, h / (floors + 1) * 0.58);   // 每条窗带高度
+  const gap = (h - 1.2) / floors;                          // 层高
+  const OUT = 0.75;                                        // 外挑（太薄在远处会看不见）
+  const IN = 1.4;                                          // 转角内缩，避免四面窗带在角部互相穿插
+  const color = C.facadeBand;
+
+  // 建筑的轴对齐外接矩形（当前所有建筑都是矩形轮廓）
+  const xs = b.shape.map(p => p[0]), ys = b.shape.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys);
+
+  for (let f = 1; f <= floors; f++) {
+    const zBase = GROUND_Y + f * gap - bandH / 2;
+    const zTop = zBase + bandH;
+
+    // 南 / 北两面（沿 x 方向铺，厚度沿 y 外挑；两端内缩 IN）
+    [[y0 - OUT, y0, -OUT], [y1, y1 + OUT, +OUT]].forEach(([ya, yb, dy]) => {
+      const e = viewer.entities.add({
+        polygon: {
+          hierarchy: new Cesium.PolygonHierarchy(
+            rectDegrees(x0 + IN - dy, ya, x1 - IN + dy, yb, 0)),
+          height: zBase,
+          extrudedHeight: zTop,
+          material: color
+        }
+      });
+      e._owner = ent;
+      layers.buildings.push(e);
+      facadeBandEnts.push(e);
+    });
+
+    // 东 / 西两面（沿 y 方向铺，厚度沿 x 外挑；两端内缩 IN）
+    [[x0 - OUT, x0, -OUT], [x1, x1 + OUT, +OUT]].forEach(([xa, xb, dx]) => {
+      const e = viewer.entities.add({
+        polygon: {
+          hierarchy: new Cesium.PolygonHierarchy(
+            rectDegrees(xa, y0 + IN - dx, xb, y1 - IN + dx, 0)),
+          height: zBase,
+          extrudedHeight: zTop,
+          material: color
+        }
+      });
+      e._owner = ent;
+      layers.buildings.push(e);
+      facadeBandEnts.push(e);
+    });
+  }
+}
 
 function buildBuildings() {
   buildings.forEach(b => {
@@ -636,12 +797,13 @@ function buildBuildings() {
     const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
     b._center = [cx, cy];
 
-    // 底座（略大的裙边）
-    groundPoly(rectDegrees(
-      Math.min(...xs) - 1.6, Math.min(...ys) - 1.6,
-      Math.max(...xs) + 1.6, Math.max(...ys) + 1.6, 0), C.wallB, 0.6);
+    // 底座（略大的裙边，带描边）
+    outlinedGround(rectDegrees(
+      Math.min(...xs) - 2.2, Math.min(...ys) - 2.2,
+      Math.max(...xs) + 2.2, Math.max(...ys) + 2.2, 0),
+      C.wallB, 0.8, EDGE_SOFT, 1);
 
-    // 建筑主体（从地表面之上起算，避免与地球表面冲突）
+    // 建筑主体（浅色墙体 + 白色描边）
     const ent = viewer.entities.add({
       name: b.name,
       properties: b,
@@ -651,10 +813,10 @@ function buildBuildings() {
         ),
         extrudedHeight: GROUND_Y + b.height,
         height: GROUND_Y + 0.5,
-        material: facadeMaterial(C.wall, b.id.charCodeAt(0)),
+        material: C.wall,
         outline: true,
-        outlineColor: Cesium.Color.fromCssColorString('#9d968a').withAlpha(0.6),
-        outlineWidth: 1
+        outlineColor: EDGE,
+        outlineWidth: 2
       }
     });
     ent._center = [cx, cy];
@@ -662,7 +824,10 @@ function buildBuildings() {
     pickables.push(ent);
     mainBuildingEnts.push(ent);
 
-    // 女儿墙 / 屋顶压顶（点击时回溯到主体）
+    // 横向窗带（这栋楼最显眼的立面特征）
+    addFacadeBands(ent, b);
+
+    // 屋顶面（浅色平屋面 + 白描边）
     const roofEnt = viewer.entities.add({
       polygon: {
         hierarchy: new Cesium.PolygonHierarchy(
@@ -671,7 +836,7 @@ function buildBuildings() {
         height: GROUND_Y + b.height + 0.1,
         material: C.roof,
         outline: true,
-        outlineColor: Cesium.Color.fromCssColorString('#8e8779'),
+        outlineColor: EDGE,
         outlineWidth: 2
       }
     });
@@ -680,14 +845,8 @@ function buildBuildings() {
     layers.buildings.push(roofEnt);
     pickables.push(roofEnt);
 
-    // 楼顶设备（水箱/空调机组）
-    viewer.entities.add({
-      position: toCarto(cx, cy, GROUND_Y + b.height + 2.2),
-      box: {
-        dimensions: new Cesium.Cartesian3(4, 3, 3.6),
-        material: Cesium.Color.fromCssColorString('#a8a296')
-      }
-    });
+    // 屋面设备间（识别特征）
+    addRoofPods(ent, b);
   });
 }
 
@@ -719,7 +878,8 @@ function stadiumOutline(cx, cy, r, straight, h, close) {
 }
 
 function buildSports() {
-  /* ---- 400 米标准跑道（红色环形塑胶）---- */
+  /* ---- 400 米标准跑道（红褐色环形塑胶）----
+     布局参照俯视参考图：田径场位于校园东侧，南北向摆放。 */
   const CX = 118, CY = 40;        // 跑道中心
   const R_OUT = 60, R_IN = 40;    // 外圈 / 内圈半径
   const STRAIGHT = 80;            // 直道长度
@@ -748,7 +908,7 @@ function buildSports() {
   viewer.entities.add({
     polygon: {
       hierarchy: new Cesium.PolygonHierarchy(inner),
-      material: Cesium.Color.fromCssColorString('#5f9e4a'),
+      material: C.grassD,
       height: GROUND_Y + 0.6
     }
   });
@@ -759,7 +919,7 @@ function buildSports() {
       polyline: {
         positions: stadiumOutline(CX, CY, r, STRAIGHT, GROUND_Y + 1.0, false),
         width: 1.3,
-        material: Cesium.Color.WHITE.withAlpha(0.65),
+        material: Cesium.Color.WHITE.withAlpha(0.6),
         clampToGround: false
       }
     });
@@ -808,34 +968,85 @@ function buildSports() {
       height: GROUND_Y + 1.1
     }
   });
-
-  /* ---- 网球场 / 篮球场（北侧）---- */
-  const courts = [
-    [-30, 150, 18, 184], [24, 150, 72, 184], [78, 150, 126, 184],
-    [132, 150, 180, 184], [186, 148, 214, 176]
-  ];
-  courts.forEach((c, i) => {
-    const ent = viewer.entities.add({
-      name: '室外球场 ' + (i + 1),
-      properties: { id:'CT'+i, name:'室外运动场 ' + (i+1), en:'Outdoor Court ' + (i+1),
-        type:'体育设施', height:0.4, floors:1, pop:24, tag: i < 4 ? '标准篮球场' : '网球场' },
-      polygon: {
-        hierarchy: new Cesium.PolygonHierarchy(rectDegrees(c[0], c[1], c[2], c[3], 0)),
-        material: i % 2 ? C.courtB : C.courtA,
-        height: GROUND_Y + 0.8
-      }
-    });
-    layers.sports.push(ent); pickables.push(ent);
-    ent._center = [(c[0] + c[2]) / 2, (c[1] + c[3]) / 2];
-    // 白色边线
-    const pad = 1.4;
-    viewer.entities.add({ polyline:{
-      positions: [toCarto(c[0]+pad,c[1]+pad,GROUND_Y+0.95), toCarto(c[2]-pad,c[1]+pad,GROUND_Y+0.95),
-                  toCarto(c[2]-pad,c[3]-pad,GROUND_Y+0.95), toCarto(c[0]+pad,c[3]-pad,GROUND_Y+0.95),
-
-                  toCarto(c[0]+pad,c[1]+pad,0.36)],
-      width:2, material: Cesium.Color.WHITE.withAlpha(0.8), clampToGround:false }});
+  // 两端球门区 + 罚球弧（简易示意，增强球场辨识度）
+  [[F0Y, 1], [F1Y, -1]].forEach(([gy, dir]) => {
+    const gd = 13, gw = 26;
+    const zx0 = CX - gw / 2, zx1 = CX + gw / 2;
+    const zy = gy + dir * gd;
+    viewer.entities.add({ polyline: {
+      positions: [toCarto(zx0, gy, L), toCarto(zx0, zy, L),
+                  toCarto(zx1, zy, L), toCarto(zx1, gy, L)],
+      width: 1.6, material: Cesium.Color.WHITE.withAlpha(0.7), clampToGround: false }});
+    viewer.entities.add({ polyline: {
+      positions: [toCarto(CX - 9, zy, L), toCarto(CX + 9, zy, L)],
+      width: 1.4, material: Cesium.Color.WHITE.withAlpha(0.6), clampToGround: false }});
   });
+
+  /* ---- 北侧球场带：网球 + 篮球（对齐俯视图北端）---- */
+  const northCourts = [
+    [-30, 152, 16, 186], [22, 152, 68, 186], [74, 152, 120, 186],
+    [126, 152, 172, 186], [178, 152, 210, 186]
+  ];
+  northCourts.forEach((c, i) => {
+    addCourt(c, i, i >= 3);
+  });
+
+  /* ---- 南侧篮球场（参照风格图：跑道南端两片蓝色球场）---- */
+  const southCourts = [
+    [62, -150, 108, -96], [114, -150, 160, -96]
+  ];
+  southCourts.forEach((c, i) => {
+    addCourt(c, i + northCourts.length, true);
+  });
+}
+
+/* 通用球场绘制：底板 + 白线 + 中圈（篮球）/ 球网线（网球） */
+function addCourt(c, i, isBall) {
+  const ent = viewer.entities.add({
+    name: '室外球场 ' + (i + 1),
+    properties: { id:'CT'+i, name:'室外运动场 ' + (i+1), en:'Outdoor Court ' + (i+1),
+      type:'体育设施', height:0.4, floors:1, pop:24,
+      tag: isBall ? '标准篮球场' : '网球场' },
+    polygon: {
+      hierarchy: new Cesium.PolygonHierarchy(rectDegrees(c[0], c[1], c[2], c[3], 0)),
+      material: isBall ? C.courtA : Cesium.Color.fromCssColorString('#4f8a5c'),
+      height: GROUND_Y + 0.8,
+      outline: true, outlineColor: EDGE, outlineWidth: 1.5
+    }
+  });
+  layers.sports.push(ent); pickables.push(ent);
+  ent._center = [(c[0] + c[2]) / 2, (c[1] + c[3]) / 2];
+
+  const pad = 1.6;
+  const wl = GROUND_Y + 0.95;
+  // 外框
+  viewer.entities.add({ polyline: {
+    positions: [toCarto(c[0]+pad,c[1]+pad,wl), toCarto(c[2]-pad,c[1]+pad,wl),
+                toCarto(c[2]-pad,c[3]-pad,wl), toCarto(c[0]+pad,c[3]-pad,wl),
+                toCarto(c[0]+pad,c[1]+pad,wl)],
+    width: 2, material: Cesium.Color.WHITE.withAlpha(0.85), clampToGround: false }});
+
+  const cx = (c[0] + c[2]) / 2, cy = (c[1] + c[3]) / 2;
+  const w = (c[2] - c[0]) / 2 - pad, h = (c[3] - c[1]) / 2 - pad;
+
+  if (isBall) {
+    // 篮球：中线 + 中圈
+    viewer.entities.add({ polyline: {
+      positions: [toCarto(c[0]+pad, cy, wl), toCarto(c[2]-pad, cy, wl)],
+      width: 1.8, material: Cesium.Color.WHITE.withAlpha(0.8), clampToGround: false }});
+    viewer.entities.add({
+      position: toCarto(cx, cy, 0),
+      ellipse: { semiMajorAxis: Math.min(w, h) * 0.32, semiMinorAxis: Math.min(w, h) * 0.32,
+        material: Cesium.Color.TRANSPARENT,
+        outline: true, outlineColor: Cesium.Color.WHITE.withAlpha(0.8), outlineWidth: 1.8,
+        height: wl }
+    });
+  } else {
+    // 网球：中线 + 网带
+    viewer.entities.add({ polyline: {
+      positions: [toCarto(c[0]+pad, cy, wl), toCarto(c[2]-pad, cy, wl)],
+      width: 1.8, material: Cesium.Color.WHITE.withAlpha(0.8), clampToGround: false }});
+  }
 }
 
 /* ---------- 8. 绿化树木 ---------- */
@@ -887,8 +1098,7 @@ function addTree(x, y, scale) {
     position: toCarto(x, y, base + hTrunk + hCrown * 0.36),
     ellipsoid: {
       radii: new Cesium.Cartesian3(rCrown, rCrown, hCrown * 0.5),
-      material: Cesium.Color.fromCssColorString(
-        Math.random() > .5 ? '#3f7a3a' : '#4a8b41').withAlpha(0.96)
+      material: C.tree.withAlpha(0.97)
     }
   });
   const c2 = viewer.entities.add({
@@ -896,23 +1106,23 @@ function addTree(x, y, scale) {
                       base + hTrunk + hCrown * 0.72),
     ellipsoid: {
       radii: new Cesium.Cartesian3(rCrown * .68, rCrown * .68, hCrown * .38),
-      material: Cesium.Color.fromCssColorString('#4f9247').withAlpha(0.94)
+      material: C.treeD.withAlpha(0.95)
     }
   });
   layers.trees.push(t, c1, c2);
 }
 
 /* ---------- 9. 设施标签 ---------- */
+/* 深色圆角胶囊标签，参照风格图：白字 + 半透明深底 */
 const labelDefs = [
-  { x:-102, y:  8,  h:26, t:'教学综合楼 A 座', s:'5F · 640人' },
-  { x: -8,  y: 14,  h:23, t:'教学楼 B 座',     s:'4F · 520人' },
-  { x:-122, y:130,  h:21, t:'科学实验楼',      s:'3F · 180人' },
-  { x:-171, y: 28,  h:24, t:'图书行政中心',    s:'4F · 120人' },
-  { x:-106, y:-152, h:18, t:'师生食堂',        s:'2F · 420人' },
-  { x: 130, y:-155, h:22, t:'体育馆',          s:'2F · 200人' },
-  { x:-142, y:190,  h:26, t:'学生公寓',        s:'6F · 760人' },
-  { x: 118, y: 52,  h:3,  t:'400米标准跑道',   s:'8跑道' },
-  { x:  6,  y:-228, h:11, t:'南门 · 门卫室',   s:'人脸识别' }
+  { x:-95,  y:  0,  h:26, t:'求知楼',       s:'5F · 2160人' },
+  { x:-181, y: -35, h:24, t:'明德楼',       s:'4F · 520人' },
+  { x: -12, y: -35, h:24, t:'启智楼',       s:'4F · 480人' },
+  { x: -94, y:  40, h:23, t:'综合楼',       s:'4F · 360人' },
+  { x:-135, y:-183, h:21, t:'风雨操场',     s:'2F · 300人' },
+  { x: 118, y:  40, h: 3, t:'田径运动场',   s:'400米 · 8跑道' },
+  { x:  85, y:-123, h: 4, t:'篮球场',       s:'标准场地' },
+  { x:  7,  y:-229, h:12, t:'南门 · 门厅',  s:'人脸识别' }
 ];
 function buildLabels() {
   labelDefs.forEach(L => {
@@ -922,12 +1132,12 @@ function buildLabels() {
         text: L.t + '\n' + L.s,
         font: '600 13px "PingFang SC", "Microsoft YaHei", sans-serif',
         fillColor: Cesium.Color.WHITE,
-        outlineColor: Cesium.Color.fromCssColorString('#0d1b2a'),
+        outlineColor: Cesium.Color.fromCssColorString('#0a1512'),
         outlineWidth: 3.5,
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         showBackground: true,
-        backgroundColor: Cesium.Color.fromCssColorString('#1b6ff5').withAlpha(0.88),
-        backgroundPadding: new Cesium.Cartesian2(9, 6),
+        backgroundColor: Cesium.Color.fromCssColorString('#0f1c19').withAlpha(0.86),
+        backgroundPadding: new Cesium.Cartesian2(11, 7),
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
@@ -1009,21 +1219,25 @@ function flyTo(x, y, h, pitchDeg, duration) {
 
 const VIEWS = {
   // 参数：(目标x, 目标y, 相机水平距离, 俯角, 时长)
-  overview:   () => flyTo(0, 0, 330, -38, 2.4),
-  teaching:   () => flyTo(-95, 0, 180, -30, 2.0),
-  playground: () => flyTo(118, 40, 190, -32, 2.0),
-  entrance:   () => flyTo(6, -200, 150, -14, 2.0),
+  // 新布局：教学组团（U 形围合）在西侧 x∈[-196,4]，田径场在东侧 x≈118。
+  // 校园整体约 x∈[-200,215]、y∈[-250,250]。
+  // 全景用「低俯角 + 远距离」的模型沙盘感（对齐参考图构图）：
+  // 相机水平距离 760 米、俯角 -32°，落在南侧，能带出校园 + 一圈城市肌理。
+  overview:   () => flyTo(0, 30, 760, -32, 2.4),
+  teaching:   () => flyTo(-95, -20, 250, -32, 2.0),
+  playground: () => flyTo(118, 40, 230, -34, 2.0),
+  entrance:   () => flyTo(7, -200, 170, -16, 2.0),
   /* 巡游路径：绕校园一圈。每个点直接给出相机经纬度位置与高度。 */
   tour: () => {
     let t = 0;
     const path = [
-      { x: 20,   y: -300, h: 200 },
-      { x: -250, y: -120, h: 220 },
-      { x: -250, y: 200,  h: 230 },
-      { x: 100,  y: 280,  h: 235 },
-      { x: 290,  y: 60,   h: 220 },
-      { x: 160,  y: -260, h: 210 },
-      { x: 20,   y: -300, h: 200 }
+      { x: 7,    y: -330, h: 205 },
+      { x: -270, y: -140, h: 225 },
+      { x: -270, y: 190,  h: 235 },
+      { x: 60,   y: 300,  h: 240 },
+      { x: 300,  y: 90,   h: 225 },
+      { x: 190,  y: -280, h: 215 },
+      { x: 7,    y: -330, h: 205 }
     ];
     const lookAtCenter = (px, py) => {
       // 相机朝校园中心俯视
@@ -1062,54 +1276,68 @@ function setNight(on) {
   isNight = on;
   const d = new Date();
   const globe = viewer.scene.globe;
+  const t = THEMES[currentTheme] || THEMES.moss;
 
   if (on) {
     d.setHours(21, 30, 0);
-    // 天空与大气
-    scene.skyAtmosphere.hueShift = -0.06;
-    scene.skyAtmosphere.saturationShift = -0.35;
-    scene.skyAtmosphere.brightnessShift = -0.48;
-    scene.skyBox.show = false;
-    scene.backgroundColor = Cesium.Color.fromCssColorString('#0a1420');
-    // 地表变暗
-    globe.baseColor = Cesium.Color.fromCssColorString('#101d2b');
-    globe.enableLighting = true;
-    globe.lightingFadeOutDistance = 1e9;
-    globe.nightFadeOutDistance = 1e9;
-    // 关闭环境光
-    scene.light = new Cesium.DirectionalLight({
-      direction: scene.camera.directionWC, intensity: 0.06
-    });
+    scene.backgroundColor = Cesium.Color.fromCssColorString('#060b0d');
+    globe.baseColor = Cesium.Color.fromCssColorString('#0a1012');
+    globe.enableLighting = false;
   } else {
     d.setHours(10, 30, 0);
-    scene.skyAtmosphere.hueShift = 0;
-    scene.skyAtmosphere.saturationShift = 0;
-    scene.skyAtmosphere.brightnessShift = 0;
-    scene.skyBox.show = false;
-    scene.backgroundColor = Cesium.Color.fromCssColorString('#0d1b2a');
-    globe.baseColor = Cesium.Color.fromCssColorString('#1b2b3a');
+    scene.backgroundColor = Cesium.Color.fromCssColorString(t.sky);
+    globe.baseColor = Cesium.Color.fromCssColorString(t.ground);
     globe.enableLighting = false;
-    scene.light = new Cesium.SunLight();
   }
+  scene.skyAtmosphere.hueShift = 0;
+  scene.skyAtmosphere.saturationShift = on ? -0.4 : 0;
+  scene.skyAtmosphere.brightnessShift = on ? -0.5 : 0;
+  scene.skyBox.show = false;
+  scene.light = new Cesium.SunLight();
   viewer.clock.currentTime = Cesium.JulianDate.fromDate(d);
 
-  // 夜间：建筑主体切换为暖黄「亮灯」材质；白天：恢复原窗格纹理
+  // 夜间：建筑主体压暗为深灰蓝；白天：恢复浅色墙
   mainBuildingEnts.forEach(ent => {
     if (!ent.polygon) return;
     if (!ent._dayMat) ent._dayMat = ent.polygon.material;   // 首次记录原始材质
     ent.polygon.material = on
       ? new Cesium.ColorMaterialProperty(
-          Cesium.Color.fromCssColorString('#f7d98a').withAlpha(0.85))
+          Cesium.Color.fromCssColorString('#2a343a'))
       : ent._dayMat;
   });
 
-  // 夜间地面铺装压暗，突出亮灯建筑
+  // 夜间：立面窗带点亮为暖黄（教室亮灯效果）；白天：恢复深蓝灰窗带
+  facadeBandEnts.forEach(e => {
+    if (!e.polygon) return;
+    if (!e._dayMat) e._dayMat = e.polygon.material;
+    e.polygon.material = on
+      ? new Cesium.ColorMaterialProperty(
+          Cesium.Color.fromCssColorString('#f2cd7a').withAlpha(0.95))
+      : e._dayMat;
+  });
+
+  // 夜间地面压暗，突出亮灯建筑
   groundPolys.forEach(g => {
     if (!g._dayMat) g._dayMat = g.polygon.material;
     g.polygon.material = on
       ? new Cesium.ColorMaterialProperty(
-          Cesium.Color.fromCssColorString('#3a4a3e'))
-      : g._dayMat;
+          Cesium.Color.fromCssColorString('#1a2422'))
+      : (g._themeRole
+          ? new Cesium.ColorMaterialProperty(
+              Cesium.Color.fromCssColorString(t[g._themeRole]))
+          : g._dayMat);
+  });
+
+  // 城市体块夜间同步压暗
+  cityBlocks.forEach(cb => {
+    if (!cb._dayMat) cb._dayMat = cb.polygon.material;
+    cb.polygon.material = on
+      ? new Cesium.ColorMaterialProperty(
+          Cesium.Color.fromCssColorString('#141b19'))
+      : (cb._themeRole
+          ? new Cesium.ColorMaterialProperty(
+              Cesium.Color.fromCssColorString(t[cb._themeRole]))
+          : cb._dayMat);
   });
 
   document.getElementById('btnDay').classList.toggle('active', !on);
@@ -1119,17 +1347,63 @@ document.getElementById('btnDay').addEventListener('click', () => setNight(false
 document.getElementById('btnNight').addEventListener('click', () => setNight(true));
 document.getElementById('btnDay').classList.add('active');
 
-/* ---------- 14b. 底图切换 ---------- */
-function switchBasemap(which) {
-  const layers = viewer.imageryLayers;
-  // 保留最底下的离线垫底层（index 0），只替换它上面的在线瓦片
-  while (layers.length > 1) layers.remove(layers.get(1), true);
-  layers.addImageryProvider(which === 'street' ? providerStreet : providerSatellite);
-  document.getElementById('btnSat').classList.toggle('active', which !== 'street');
-  document.getElementById('btnStreet').classList.toggle('active', which === 'street');
+/* ---------- 14b. 环境配色切换（矢量风，不使用实景地图） ---------- */
+/* 两套深色科技风配色：「深空」偏冷黑，「墨绿」偏自然绿。
+   全部为矢量绘制，不加载任何卫星影像素材。 */
+const THEMES = {
+  deep: {
+    label: '深空',
+    sky:      '#0a1014',
+    ground:   '#222b2e',
+    groundLt: '#283234',
+    campus:   '#2f3a38',
+    cityA:    '#2c373b',
+    cityB:    '#374549',
+    grid:     '#3b4a4e',
+    road:     '#465254',
+    cityRoad: '#3d484a'
+  },
+  moss: {
+    label: '墨绿',
+    sky:      '#0d1512',
+    ground:   '#2d3a35',
+    groundLt: '#35443e',
+    campus:   '#3c4a43',
+    cityA:    '#35433d',
+    cityB:    '#41524a',
+    grid:     '#46584f',
+    road:     '#525e58',
+    cityRoad: '#48544e'
+  }
+};
+
+let currentTheme = 'moss';
+
+function applyTheme(name) {
+  const t = THEMES[name] || THEMES.moss;
+  currentTheme = name;
+
+  // 天空 / 背景
+  scene.backgroundColor = Cesium.Color.fromCssColorString(t.sky);
+  scene.globe.baseColor = Cesium.Color.fromCssColorString(t.ground);
+
+  // 地面与城市体块重新着色
+  groundPolys.forEach(g => {
+    if (!g._themeRole) return;
+    g.polygon.material = new Cesium.ColorMaterialProperty(
+      Cesium.Color.fromCssColorString(t[g._themeRole]));
+  });
+
+  document.getElementById('btnMoss').classList.toggle('active', name === 'moss');
+  document.getElementById('btnDeep').classList.toggle('active', name === 'deep');
 }
-document.getElementById('btnSat').addEventListener('click', () => switchBasemap('sat'));
-document.getElementById('btnStreet').addEventListener('click', () => switchBasemap('street'));
+document.getElementById('btnMoss').addEventListener('click', () => applyTheme('moss'));
+document.getElementById('btnDeep').addEventListener('click', () => applyTheme('deep'));
+
+/* 关键：必须在初始化时主动应用一次主题。
+   否则 globe.baseColor 会保持 Cesium 默认的深蓝（#000080），
+   深色城市体块与深蓝底色几乎同色 —— 表现为「周边城市肌理看不见」。 */
+applyTheme(currentTheme);
 
 /* ---------- 15. 点击交互：建筑高亮 + 信息卡 ---------- */
 const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
@@ -1270,14 +1544,15 @@ setInterval(() => {
 }, 1000);
 
 /* ---------- 18. 初始视角 & 加载完成 ---------- */
-/* 初始视角：相机放在校园正南 320 米、海拔 340 米处，朝正北俯视 40°。
-   校园约 430×490 米，此视角下建筑轮廓清晰、跑道完整入画。
+/* 初始视角：相机放在校园正南 760 米、朝正北俯视 32°。
+   校园约 420×500 米（教学组团在西、田径场在东），此视角下校园完整入画，
+   并在四周留出一圈城市肌理 —— 对齐实景参考图一 / 图三的构图。
    注意 destination 是「相机的绝对位置」（经纬度 + 海拔高度）。 */
 camera.setView({
-  destination: toCarto(0, -320, 340),
+  destination: toCarto(0, -760, 480),
   orientation: {
     heading: Cesium.Math.toRadians(0),
-    pitch: Cesium.Math.toRadians(-40),
+    pitch: Cesium.Math.toRadians(-32),
     roll: 0
   }
 });
